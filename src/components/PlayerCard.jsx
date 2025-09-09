@@ -1,4 +1,4 @@
-import { FiPlus, FiTrendingUp, FiTrendingDown } from "react-icons/fi";
+import { FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
 

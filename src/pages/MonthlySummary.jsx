@@ -38,10 +38,10 @@ export const MonthlySummary = () => {
     const fetchTransactions = async () => {
         try {
         const [earningsRes, expensesRes] = await Promise.all([
-            axios.get("http://localhost:3000/transactions", {
+            axios.get("https://dashboard-backend-kmpv.onrender.com/transactions", {
             params: { month, year, type: "earning" },
             }),
-            axios.get("http://localhost:3000/transactions", {
+            axios.get("https://dashboard-backend-kmpv.onrender.com/transactions", {
             params: { month, year, type: "expense" },
             }),
         ])

@@ -7,7 +7,7 @@ export const ContextAppProvider = ({ children }) => {
     const [players, setPlayers] = useState([])
 
     async function getPlayers() {
-      const {data} = await axios.get('http://localhost:3000/players');
+      const {data} = await axios.get('https://dashboard-backend-kmpv.onrender.com/players');
       
       
       const actualMonth = new Date().getMonth() + 1; 

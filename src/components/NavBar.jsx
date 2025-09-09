@@ -29,7 +29,7 @@ export const NavBar = () => {
             name: nameValue,
             birth_date: inputDate.toISOString().split('T')[0],
         }
-        const res = await axios.post("http://localhost:3000/players", data)
+        const res = await axios.post("https://dashboard-backend-kmpv.onrender.com/players", data)
         if (res.status === 200) {
             alert("Jugador agregado exitosamente.")
             getPlayers()

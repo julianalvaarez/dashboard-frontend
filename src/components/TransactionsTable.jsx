@@ -25,7 +25,7 @@ export const TransactionsTable = ({player}) => {
   const deleteTransaction = async (id) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
       try {
-        const { data } = await axios.delete(`http://localhost:3000/transactions/${id}`);
+        const { data } = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`);
         setTransactions((prev) => prev.filter((t) => t.id !== id));
         console.log(data.message);
       } catch (error) {
@@ -43,7 +43,7 @@ export const TransactionsTable = ({player}) => {
   }
 
   const editTransaction = async () => {
-    const res = await axios.put(`http://localhost:3000/transactions/${editIdTransaction}`, {
+    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${editIdTransaction}`, {
       type: editType,
       description: editDescription,
       amount: parseFloat(editAmount),

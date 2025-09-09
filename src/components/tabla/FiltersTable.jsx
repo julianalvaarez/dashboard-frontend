@@ -12,7 +12,7 @@ export const FiltersTable = ({ table, setTransactions }) => {
         const selectedIds = table.getFilteredSelectedRowModel().rows.map((row) => row.original.id);
 
         try {
-          const { data } = await axios.delete("http://localhost:3000/transactions", {
+          const { data } = await axios.delete("https://dashboard-backend-kmpv.onrender.com/transactions", {
             data: { ids: selectedIds }, // 👈 mandamos array en el body
           });
 

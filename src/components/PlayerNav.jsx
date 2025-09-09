@@ -33,7 +33,7 @@ export const PlayerNav = ({player}) => {
       amount: parseFloat(amount),
       date: inputTransactionDate.toISOString().split('T')[0],
     }
-    const res = await axios.post(`http://localhost:3000/transactions`, data)
+    const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
     if (res.status === 200) {
       alert("Transaccion agregada exitosamente.")
       navigate("/")
@@ -47,7 +47,7 @@ export const PlayerNav = ({player}) => {
       name: nameValue,
       birth_date: inputDate.toISOString().split('T')[0],
     }
-    const res = await axios.put(`http://localhost:3000/players/${player.id}`, data)
+    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
     if (res.status === 200) {
       alert("Jugador editado exitosamente.")
       navigate("/")
@@ -59,7 +59,7 @@ export const PlayerNav = ({player}) => {
   const deletePlayer = async () => {
     const confirmed = window.confirm(`¿Estás seguro de que deseas eliminar al jugador ${player.name}? Esta acción no se puede deshacer.`)
     if (confirmed) {
-      const res = await axios.delete(`http://localhost:3000/players/${player.id}`)
+      const res = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`)
       console.log(res.status);
       if (res.status === 200) {
         alert("Jugador eliminado exitosamente.")
