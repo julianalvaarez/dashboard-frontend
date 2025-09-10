@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
 import { flexRender } from "@tanstack/react-table"
 
-export const ContentTable = ({table, columns}) => {
+export const ContentTable = ({table, columns, sumAmounts}) => {
   return (
     <>
       <div className="overflow-hidden rounded-md border">
@@ -24,6 +24,7 @@ export const ContentTable = ({table, columns}) => {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
+              
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -37,8 +38,9 @@ export const ContentTable = ({table, columns}) => {
                       )}
                     </TableCell>
                   ))}
-                </TableRow>
-              ))
+                </TableRow> 
+              ))  
+                                  
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -48,6 +50,9 @@ export const ContentTable = ({table, columns}) => {
             )}
           </TableBody>
         </Table>
+        <div className="flex justify-end bg-gray-100 p-4 text-lg font-semibold">
+          Total: <span className={`${sumAmounts < 0 ? 'text-red-700' : 'text-green-700'} pl-2`}>${sumAmounts.toLocaleString("de-DE")}</span>
+        </div>
       </div>        
     </>
   )

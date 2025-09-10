@@ -25,7 +25,7 @@ export function PlayerCard({ player }) {
             isPositive ? "text-green-600" : "text-red-600"
           }`}
         >
-          {isPositive ? "+" : "-"}${Math.abs(player.monthlyBalance.total)}
+          {isPositive ? "+" : "-"}${Math.abs(player.monthlyBalance.total).toLocaleString("de-DE")}
         </span>
       </div>
 

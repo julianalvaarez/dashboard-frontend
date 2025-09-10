@@ -68,6 +68,10 @@ export const TransactionsTable = ({player}) => {
     })),
     [transactions]
   )
+  
+  const sumAmounts = Object.values(transactions).reduce((acc, transaction) => {
+    return transaction.type === "expense" ? acc - transaction.amount : acc + transaction.amount;
+  }, 0)
 
   // Función para comparar fechas y poder ordenar de mas nuevo a más viejo y viceversa
   const compareFechas = (a, b) => {
@@ -152,6 +156,34 @@ export const TransactionsTable = ({player}) => {
                   Editar
                 </DropdownMenuItem>
                 <DropdownMenuItem
+  onClick={async () => {
+    // Pedir fecha nueva
+    const newDate = prompt("Ingrese la fecha para la transacción duplicada (YYYY-MM-DD):")
+    if (!newDate) return
+
+    // Armar nueva transacción copiando la original
+    const duplicated = {
+      description: transaction.description,
+      amount: Math.abs(transaction.amount), // Asegurarse que el monto sea positivo
+      type: transaction.type === "Gasto" ? "expense" : "earning",
+      date: newDate,
+      player_id: player.id,
+    }
+    console.log(transaction, duplicated);
+    try {
+      // Crear en el backend
+      const { data } = await axios.post("https://dashboard-backend-kmpv.onrender.com/transactions", duplicated)
+      console.log(data.message);
+      // Actualizar frontend
+      setTransactions((prev) => [...prev, duplicated])
+    } catch (err) {
+      console.error("Error duplicando transacción:", err)
+    }
+  }}
+>
+  Duplicar transacción
+</DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={() => deleteTransaction(transaction.id)}
                   className="text-red-600 focus:text-white focus:bg-red-600 cursor-pointer"
                 >
@@ -188,7 +220,7 @@ export const TransactionsTable = ({player}) => {
         <FiltersTable table={table} setTransactions={setTransactions} />
 
       {/* 🔹 Tabla */}
-        <ContentTable table={table} columns={columns} />
+        <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} />
 
         <Sheet open={modalEditTransaction} onOpenChange={setModalEditTransaction}>
             <SheetContent >
