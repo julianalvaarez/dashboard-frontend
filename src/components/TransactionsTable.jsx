@@ -13,9 +13,9 @@ import { ContentTable } from "./tabla/ContentTable"
 import { FiltersTable } from "./tabla/FiltersTable"
 import axios from "axios"
 
-export const TransactionsTable = ({player}) => {
+export const TransactionsTable = ({player, transactions, setTransactions}) => {
     // Almacenar las transcacciones en un estado local
-  const [transactions, setTransactions] = useState(player.transactions)
+
   const [modalEditTransaction, setModalEditTransaction] = useState(false)
   const [editDescription, setEditDescription] = useState('')
   const [editAmount, setEditAmount] = useState(0)
@@ -26,8 +26,9 @@ export const TransactionsTable = ({player}) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
       try {
         const { data } = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`);
-        setTransactions((prev) => prev.filter((t) => t.id !== id));
+
         console.log(data.message);
+        setTransactions((prev) => prev.filter((t) => t.id !== id));
       } catch (error) {
         console.error("Error eliminando transacción:", error);
       }
@@ -194,6 +195,7 @@ export const TransactionsTable = ({player}) => {
       type: transaction.type === "Gasto" ? "expense" : "earning",
       date: newDate,
       player_id: player.id,
+      usd_rate: transaction.usd_rate,
     }
     console.log(transaction, duplicated);
     try {

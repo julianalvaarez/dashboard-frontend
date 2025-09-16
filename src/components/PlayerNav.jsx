@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
 
-export const PlayerNav = ({player}) => {
+export const PlayerNav = ({player, transactions, setTransactions}) => {
   const navigate = useNavigate()
   const [editPlayerOpen, setEditPlayerOpen] = useState(false)
   const [addTransactionOpen, setAddTransactionOpen] = useState(false)
@@ -32,11 +32,14 @@ export const PlayerNav = ({player}) => {
       description: description,
       amount: parseFloat(amount),
       date: inputTransactionDate.toISOString().split('T')[0],
+      usd_rate: 1.0, // Valor fijo de 1.0
     }
+    //https://dashboard-backend-kmpv.onrender.com
     const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
     if (res.status === 200) {
       alert("Transaccion agregada exitosamente.")
-      navigate("/")
+      setTransactions([data, ...transactions]);
+
     } else {
       alert("Hubo un error al editar el jugador. Inténtalo de nuevo.")
     }
@@ -149,7 +152,7 @@ export const PlayerNav = ({player}) => {
                     </div>               
                 </div>
                 <SheetFooter>
-                    <Button type="submit" onClick={addTransaction}>Guardar transaccion</Button>
+                    <Button type="submit" onClick={() => {setAddTransactionOpen(false); addTransaction()}}>Guardar transaccion</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
