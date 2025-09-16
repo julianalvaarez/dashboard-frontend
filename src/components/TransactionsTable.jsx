@@ -65,6 +65,8 @@ export const TransactionsTable = ({player}) => {
       description: t.description,
       amount: t.type === "expense" ? -t.amount : t.amount,
       date: new Date(t.date).toLocaleDateString("es-AR"),
+      amountUSD: t.type === "expense" ? -(t.amount / t.usd_rate).toFixed(2) : (t.amount / t.usd_rate).toFixed(2),
+      usd_rate: t.usd_rate,
     })),
     [transactions]
   )
@@ -130,6 +132,30 @@ export const TransactionsTable = ({player}) => {
           const formatted = new Intl.NumberFormat("es-AR", {
             style: "currency",
             currency: "ARS",
+          }).format(amount)
+          return <div className="text-right font-medium">{formatted}</div>
+        },
+      },
+      {
+        accessorKey: "amountUSD",
+        header: () => <div className="text-right">Monto USD</div>,
+        cell: ({ row }) => {
+          const amount = parseFloat(row.getValue("amountUSD"))
+          const formatted = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+          }).format(amount)
+          return <div className="text-right font-medium">{formatted}</div>
+        },
+      },
+            {
+        accessorKey: "usd_rate",
+        header: () => <div className="text-right">Valor USD</div>,
+        cell: ({ row }) => {
+          const amount = parseFloat(row.getValue("usd_rate"))
+          const formatted = new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
           }).format(amount)
           return <div className="text-right font-medium">{formatted}</div>
         },
@@ -220,7 +246,7 @@ export const TransactionsTable = ({player}) => {
         <FiltersTable table={table} setTransactions={setTransactions} />
 
       {/* 🔹 Tabla */}
-        <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} />
+        <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} transactions={transactions} />
 
         <Sheet open={modalEditTransaction} onOpenChange={setModalEditTransaction}>
             <SheetContent >
