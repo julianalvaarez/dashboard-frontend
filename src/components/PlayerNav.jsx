@@ -18,6 +18,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [type, setType] = useState(false)
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)  
+  const [valorUSD, setValorUSD] = useState(null)  
   const [inputTransactionDate, setInputTransactionDate] = useState(new Date())
 
   // Estados para el formulario
@@ -32,8 +33,9 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       description: description,
       amount: parseFloat(amount),
       date: inputTransactionDate.toISOString().split('T')[0],
-      usd_rate: 1.0, // Valor fijo de 1.0
+      usd_rate: valorUSD , // Valor fijo de 1.0
     }
+    console.log(data);
     //https://dashboard-backend-kmpv.onrender.com
     const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
     if (res.status === 200) {
@@ -117,7 +119,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                 </SheetFooter>
             </SheetContent>
         </Sheet>
-        <Sheet open={addTransactionOpen} onOpenChange={setAddTransactionOpen}>
+        <Sheet open={addTransactionOpen} onOpenChange={setAddTransactionOpen} >
             <SheetContent >
                 <SheetHeader>
                     <SheetTitle>Agregar transacción</SheetTitle>
@@ -144,10 +146,14 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Monto</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setAmount(e.target.value) } value={amount}  />
+                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
+                    </div>  
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-name" ><span className="flex flex-col gap-1"><p>Valor USD</p> <span className="text-xs  text-muted-foreground">(Completar si el valor del USD es diferente al actual)</span></span></Label>
+                        <Input id="sheet-demo-name" type={"number"} onChange={(e) => setValorUSD(e.target.value) } value={valorUSD}  />
                     </div>     
                     <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-username">Fecha de Nacimiento</Label>
+                        <Label htmlFor="sheet-demo-username">Fecha de Pago</Label>
                         <Calendar mode="single" selected={inputTransactionDate} onSelect={setInputTransactionDate} className="rounded-md border shadow-sm" captionLayout="dropdown" />
                     </div>               
                 </div>
