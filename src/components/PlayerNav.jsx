@@ -33,6 +33,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       description: description,
       amount: parseFloat(amount),
       date: inputTransactionDate.toISOString().split('T')[0],
+      currency: currency
     }
     console.log(data);
     //https://dashboard-backend-kmpv.onrender.com
