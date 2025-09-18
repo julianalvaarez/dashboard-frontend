@@ -148,8 +148,6 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                         <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
                     </div>  
                     <div className="grid gap-3">
-                      <Label htmlFor="amount">Monto</Label>
-                      <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
 
                       <Label htmlFor="currency">Moneda</Label>
                       <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className="border rounded-md p-2" >
