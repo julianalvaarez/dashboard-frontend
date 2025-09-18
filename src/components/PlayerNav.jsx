@@ -18,7 +18,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [type, setType] = useState(false)
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)  
-  const [valorUSD, setValorUSD] = useState(null)  
+  const [currency, setCurrency] = useState('ARS')
   const [inputTransactionDate, setInputTransactionDate] = useState(new Date())
 
   // Estados para el formulario
@@ -33,7 +33,6 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       description: description,
       amount: parseFloat(amount),
       date: inputTransactionDate.toISOString().split('T')[0],
-      usd_rate: valorUSD , // Valor fijo de 1.0
     }
     console.log(data);
     //https://dashboard-backend-kmpv.onrender.com
@@ -149,8 +148,14 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                         <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
                     </div>  
                     <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-name" ><span className="flex flex-col gap-1"><p>Valor USD</p> <span className="text-xs  text-muted-foreground">(Completar si el valor del USD es diferente al actual)</span></span></Label>
-                        <Input id="sheet-demo-name" type={"number"} onChange={(e) => setValorUSD(e.target.value) } value={valorUSD}  />
+                      <Label htmlFor="amount">Monto</Label>
+                      <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+
+                      <Label htmlFor="currency">Moneda</Label>
+                      <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className="border rounded-md p-2" >
+                        <option value="ARS">Pesos (ARS)</option>
+                        <option value="USD">Dólares (USD)</option>
+                      </select>
                     </div>     
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-username">Fecha de Pago</Label>
