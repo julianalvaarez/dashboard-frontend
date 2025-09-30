@@ -93,7 +93,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
           </DropdownMenuContent>
         </DropdownMenu>    
       </div>    
-        <Sheet open={editPlayerOpen} onOpenChange={setEditPlayerOpen}>
+        <Sheet open={editPlayerOpen} onOpenChange={setEditPlayerOpen} >
             <SheetContent >
                 <SheetHeader>
                     <SheetTitle>Editar jugador</SheetTitle>
@@ -119,8 +119,8 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                 </SheetFooter>
             </SheetContent>
         </Sheet>
-        <Sheet open={addTransactionOpen} onOpenChange={setAddTransactionOpen} >
-            <SheetContent >
+        <Sheet open={addTransactionOpen} onOpenChange={setAddTransactionOpen}  >
+            <SheetContent className="overflow-y-auto" >
                 <SheetHeader>
                     <SheetTitle>Agregar transacción</SheetTitle>
                     <SheetDescription>
