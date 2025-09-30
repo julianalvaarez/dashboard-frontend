@@ -21,7 +21,7 @@ export const MonthlySummary = () => {
   const expensesByPlayer = useMemo(() => {
   const map = {}
   transactions.forEach((t) => {
-    if (t.type === "expense") {
+    if (t.type === "expense"  && t.player?.id !== 34) {
       const playerName = t.player?.name || "Sin asignar"
       map[playerName] = (map[playerName] || 0) + t.amount
     }
