@@ -14,13 +14,27 @@ import { FiltersTable } from "./tabla/FiltersTable"
 import axios from "axios"
 
 export const TransactionsTable = ({player, transactions, setTransactions}) => {
+  const today = new Date()
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1) // 1–12
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear())
     // Almacenar las transcacciones en un estado local
-
   const [modalEditTransaction, setModalEditTransaction] = useState(false)
   const [editDescription, setEditDescription] = useState('')
   const [editAmount, setEditAmount] = useState(0)
   const [editType, setEditType] = useState('')
   const [editIdTransaction, setEditIdTransaction] = useState(false)
+
+
+  const filteredTransactions = useMemo(() => {
+  return transactions.filter((t) => {
+    const d = new Date(t.date)
+    return (
+      d.getMonth() + 1 === Number(selectedMonth) &&
+      d.getFullYear() === Number(selectedYear)
+    )
+  })
+}, [transactions, selectedMonth, selectedYear])
+
 
   const deleteTransaction = async (id) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
@@ -59,22 +73,31 @@ export const TransactionsTable = ({player, transactions, setTransactions}) => {
   }
 
   // Adaptar datos para la tabla
-  const data = useMemo(() =>
-    transactions.map((t) => ({
-      id: t.id,
-      type: t.type === "expense" ? "Gasto" : "Ingreso",
-      description: t.description,
-      amount: t.type === "expense" ? -t.amount : t.amount,
-      date: new Date(t.date).toLocaleDateString("es-AR"),
-      amountUSD: t.type === "expense" ? -(t.amount / t.usd_rate).toFixed(2) : (t.amount / t.usd_rate).toFixed(2),
-      usd_rate: t.usd_rate,
-    })),
-    [transactions]
+  const data = useMemo(
+    () =>
+      filteredTransactions.map((t) => ({
+        id: t.id,
+        type: t.type === "expense" ? "Gasto" : "Ingreso",
+        description: t.description,
+        amount: t.type === "expense" ? -t.amount : t.amount,
+        date: new Date(t.date).toLocaleDateString("es-AR"),
+        amountUSD:
+          t.type === "expense"
+            ? -(t.amount / t.usd_rate).toFixed(2)
+            : (t.amount / t.usd_rate).toFixed(2),
+        usd_rate: t.usd_rate,
+      })),
+    [filteredTransactions]
   )
-  
-  const sumAmounts = Object.values(transactions).reduce((acc, transaction) => {
-    return transaction.type === "expense" ? acc - transaction.amount : acc + transaction.amount;
-  }, 0)
+
+  const sumAmounts = useMemo(() => {
+    return filteredTransactions.reduce((acc, transaction) => {
+      return transaction.type === "expense"
+        ? acc - transaction.amount
+        : acc + transaction.amount
+    }, 0)
+  }, [filteredTransactions])
+
 
   // Función para comparar fechas y poder ordenar de mas nuevo a más viejo y viceversa
   const compareFechas = (a, b) => {
@@ -244,11 +267,50 @@ export const TransactionsTable = ({player, transactions, setTransactions}) => {
 
   return (
     <>
+    <div className="flex gap-4 my-4">
+      {/* Select Mes */}
+      <Select value={String(selectedMonth)} onValueChange={setSelectedMonth}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Mes" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Mes</SelectLabel>
+            {[
+              "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+              "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+            ].map((m, i) => (
+              <SelectItem key={i+1} value={String(i+1)}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+
+      {/* Select Año */}
+      <Select value={String(selectedYear)} onValueChange={setSelectedYear}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Año" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Año</SelectLabel>
+            {[2023,2024,2025].map((year) => (
+              <SelectItem key={year} value={String(year)}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+
       {/* 🔹 Filtro por descripción + botón eliminar seleccionados */}
         <FiltersTable table={table} setTransactions={setTransactions} />
 
       {/* 🔹 Tabla */}
-        <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} transactions={transactions} />
+        <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} transactions={filteredTransactions} />
 
         <Sheet open={modalEditTransaction} onOpenChange={setModalEditTransaction}>
             <SheetContent >
