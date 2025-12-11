@@ -37,15 +37,9 @@ export const HomePage = () => {
       {/* Header */}
       <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
         <h1 className="text-2xl font-bold">Jugadores</h1>
-        <Input
-          placeholder="Buscar jugador..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
+        <Input placeholder="Buscar jugador..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
       </div>
 
-      {/* Grid de jugadores */}
      {/* Lista de jugadores */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {filteredPlayers.length ? (

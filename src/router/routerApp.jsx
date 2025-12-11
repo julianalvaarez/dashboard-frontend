@@ -5,6 +5,7 @@ import { PlayerPage, MonthlySummary, HomePage } from "../pages";
 
 export const RouterApp = () => {
   const {players} = useContext(ContextApp)
+  
   return (
     <>
       <Routes>

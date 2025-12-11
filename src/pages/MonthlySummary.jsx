@@ -196,32 +196,32 @@ export const MonthlySummary = () => {
         </Table>
       </div>
       <Card className="mt-6">
-  <CardHeader>
-    <CardTitle>Gastos por jugador</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <ChartContainer
-      config={{
-        total: {
-          label: "Total Gastado",
-          color: "#660000", // usa color rojo del theme
-        },
-      }}
-      className="h-[400px] w-full"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={expensesByPlayer}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </ChartContainer>
-  </CardContent>
-</Card>
+        <CardHeader>
+          <CardTitle>Gastos por jugador</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer
+            config={{
+              total: {
+                label: "Total Gastado",
+                color: "#660000", // usa color rojo del theme
+              },
+            }}
+            className="h-[400px] w-full"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={expensesByPlayer}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
 
     </div>
   )

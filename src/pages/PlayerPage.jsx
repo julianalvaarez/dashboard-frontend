@@ -3,6 +3,8 @@ import { IoIosArrowBack } from "react-icons/io";
 import { PlayerNav } from "@/components/PlayerNav";
 import { TransactionsTable } from "@/components/TransactionsTable"
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { exportPlayerExcel } from "@/lib/exportExcel";
 
 export const PlayerPage = ({ player }) => {
   const [transactions, setTransactions] = useState(player.transactions)
@@ -17,6 +19,12 @@ export const PlayerPage = ({ player }) => {
 
       {/* 🔹 Tabla de transacciones */}
       <TransactionsTable player={player} transactions={transactions} setTransactions={setTransactions} />
+      <Button
+        variant="outline"
+        onClick={() => exportPlayerExcel(player.name, transactions)}
+      >
+        Descargar Excel
+      </Button>
     </div>
   )
 }
