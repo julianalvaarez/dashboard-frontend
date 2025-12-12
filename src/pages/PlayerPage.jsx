@@ -5,6 +5,7 @@ import { TransactionsTable } from "@/components/TransactionsTable"
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { exportPlayerExcel } from "@/lib/exportExcel";
+import { FixedTransactions } from "@/components/FixedTransactions";
 
 export const PlayerPage = ({ player }) => {
   const [transactions, setTransactions] = useState(player.transactions)
@@ -25,6 +26,7 @@ export const PlayerPage = ({ player }) => {
       >
         Descargar Excel
       </Button>
+      <FixedTransactions player={player} />
     </div>
   )
 }

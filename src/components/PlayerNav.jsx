@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 
 export const PlayerNav = ({player, transactions, setTransactions}) => {
   const navigate = useNavigate()
@@ -21,29 +22,33 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [currency, setCurrency] = useState('ARS')
   const [inputTransactionDate, setInputTransactionDate] = useState(new Date())
 
+  const [isFixed, setIsFixed] = useState(false)
+  const [fixedDay, setFixedDay] = useState(new Date().getDate())
+
   // Estados para el formulario
   const [inputDate, setInputDate] = useState(new Date())
   const [nameValue, setNameValue] = useState(player.name)
 
-  // Función para editar jugador
-  const addTransaction = async () => {
-    const data = {
-      player_id: player.id,
-      type: type,
-      description: description,
-      amount: parseFloat(amount),
-      date: inputTransactionDate.toISOString().split('T')[0],
-      currency: currency
-    }
-    console.log(data);
-    //https://dashboard-backend-kmpv.onrender.com
-    const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
-    if (res.status === 200) {
-      alert("Transaccion agregada exitosamente.")
-      setTransactions([data, ...transactions]);
+ const addTransaction = async () => {
+    const baseData = { player_id: player.id, type, description, amount: parseFloat(amount), currency, }
+
+    if (isFixed) {
+      const res = await axios.post("https://dashboard-backend-kmpv.onrender.com/fixed-transactions",  { ...baseData, day_of_month: fixedDay })
+
+      if (res.status === 200 || res.status === 201) {
+        alert("Transacción fija agregada correctamente.")
+        setAddTransactionOpen(false)
+      }
 
     } else {
-      alert("Hubo un error al editar el jugador. Inténtalo de nuevo.")
+      const data = { ...baseData, date: inputTransactionDate.toISOString().split("T")[0], }
+
+      const res = await axios.post( "https://dashboard-backend-kmpv.onrender.com/transactions", data )
+      if (res.status === 200 || res.status === 201) {
+        alert("Transacción agregada exitosamente.")
+        setTransactions([res.data, ...transactions])
+        setAddTransactionOpen(false)
+      }
     }
   }
 
@@ -53,7 +58,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       birth_date: inputDate.toISOString().split('T')[0],
     }
     const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 201) {
       alert("Jugador editado exitosamente.")
       navigate("/")
     } else {
@@ -119,55 +124,95 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                 </SheetFooter>
             </SheetContent>
         </Sheet>
-        <Sheet open={addTransactionOpen} onOpenChange={setAddTransactionOpen}  >
-            <SheetContent className="overflow-y-auto" >
-                <SheetHeader>
-                    <SheetTitle>Agregar transacción</SheetTitle>
-                    <SheetDescription>
-                        Todos los campos son obligatorios, asegurate de completarlos.
-                    </SheetDescription>
-                </SheetHeader>
-                <div className="grid flex-1 auto-rows-min gap-6 px-4">
-                    <Select onValueChange={setType} value={type}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Tipo de transacción" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Tipo</SelectLabel>
-                          <SelectItem value="expense">Gasto</SelectItem>
-                          <SelectItem value="earning">Ganancia</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-name">Descripcion</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setDescription(e.target.value) } value={description}  />
-                    </div>
-                    <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-name">Monto</Label>
-                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
-                    </div>  
-                    <div className="grid gap-3">
+        <Sheet open={addTransactionOpen} onOpenChange={setAddTransactionOpen}>
+          <SheetContent className="overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Agregar transacción</SheetTitle>
+              <SheetDescription>Complete todos los campos.</SheetDescription>
+            </SheetHeader>
 
-                      <Label htmlFor="currency">Moneda</Label>
-                      <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className="border rounded-md p-2" >
-                        <option value="ARS">Pesos (ARS)</option>
-                        <option value="USD">Dólares (USD)</option>
-                      </select>
-                    </div>     
-                    <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-username">Fecha de Pago</Label>
-                        <Calendar mode="single" selected={inputTransactionDate} onSelect={setInputTransactionDate} className="rounded-md border shadow-sm" captionLayout="dropdown" />
-                    </div>               
+            <div className="grid gap-6 px-4">
+
+              {/* Tipo */}
+              <Select onValueChange={setType} value={type}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="expense">Gasto</SelectItem>
+                  <SelectItem value="earning">Ingreso</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Descripción */}
+              <div className="grid gap-3">
+                <Label>Descripción</Label>
+                <Input value={description} onChange={(e) => setDescription(e.target.value)} />
+              </div>
+
+              {/* Monto */}
+              <div className="grid gap-3">
+                <Label>Monto</Label>
+                <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              </div>
+
+              {/* Moneda */}
+              <div className="grid gap-3">
+                <Label>Moneda</Label>
+                <select className="border rounded-md p-2" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                  <option value="ARS">Pesos (ARS)</option>
+                  <option value="USD">Dólares (USD)</option>
+                </select>
+              </div>
+
+              {/* 🔵 SWITCH FIJO */}
+              <div className="flex items-center justify-between border p-3 rounded-lg">
+                <div>
+                  <p className="font-medium">¿Transacción fija?</p>
+                  <p className="text-sm text-muted-foreground">Se repetirá automáticamente cada mes.</p>
                 </div>
-                <SheetFooter>
-                    <Button type="submit" onClick={() => {setAddTransactionOpen(false); addTransaction()}}>Guardar transaccion</Button>
-                    <SheetClose asChild>
-                        <Button variant="outline">Cerrar</Button>
-                    </SheetClose>
-                </SheetFooter>
-            </SheetContent>
+                <Switch checked={isFixed} onCheckedChange={setIsFixed} />
+              </div>
+
+              {/* 🔵 DÍA DEL MES (solo si es fija) */}
+              {isFixed && (
+                <div>
+                  <Label>Día del mes</Label>
+                  <select 
+                    className="border p-2 rounded-md"
+                    value={fixedDay}
+                    onChange={(e) => setFixedDay(Number(e.target.value))}
+                  >
+                    {Array.from({ length: 28 }).map((_, i) => (
+                      <option key={i} value={i + 1}>{i + 1}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Fecha (solo si NO es fija) */}
+              {!isFixed && (
+                <div className="grid gap-3">
+                  <Label>Fecha</Label>
+                  <Calendar 
+                    mode="single"
+                    selected={inputTransactionDate}
+                    onSelect={setInputTransactionDate}
+                    className="rounded-md border shadow-sm"
+                  />
+                </div>
+              )}
+
+            </div>
+
+            {/* FOOTER */}
+            <SheetFooter>
+              <Button onClick={addTransaction}>Guardar</Button>
+              <SheetClose asChild>
+                <Button variant="outline">Cerrar</Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
         </Sheet>
         </>    
   )
