@@ -13,7 +13,7 @@ import { ContentTable } from "./tabla/ContentTable"
 import { FiltersTable } from "./tabla/FiltersTable"
 import axios from "axios"
 
-export const TransactionsTable = ({player, transactions, setTransactions}) => {
+export const TransactionsTable = ({transactions, setTransactions}) => {
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1) // 1–12
   const [selectedYear, setSelectedYear] = useState(today.getFullYear())
@@ -205,35 +205,7 @@ export const TransactionsTable = ({player, transactions, setTransactions}) => {
                 >
                   Editar
                 </DropdownMenuItem>
-                <DropdownMenuItem
-  onClick={async () => {
-    // Pedir fecha nueva
-    const newDate = prompt("Ingrese la fecha para la transacción duplicada (YYYY-MM-DD):")
-    if (!newDate) return
-
-    // Armar nueva transacción copiando la original
-    const duplicated = {
-      description: transaction.description,
-      amount: Math.abs(transaction.amount), // Asegurarse que el monto sea positivo
-      type: transaction.type === "Gasto" ? "expense" : "earning",
-      date: newDate,
-      player_id: player.id,
-      usd_rate: transaction.usd_rate,
-    }
-    console.log(transaction, duplicated);
-    try {
-      // Crear en el backend
-      const { data } = await axios.post("https://dashboard-backend-kmpv.onrender.com/transactions", duplicated)
-      console.log(data.message);
-      // Actualizar frontend
-      setTransactions((prev) => [...prev, duplicated])
-    } catch (err) {
-      console.error("Error duplicando transacción:", err)
-    }
-  }}
->
-  Duplicar transacción
-</DropdownMenuItem>
+              
                 <DropdownMenuItem
                   onClick={() => deleteTransaction(transaction.id)}
                   className="text-red-600 focus:text-white focus:bg-red-600 cursor-pointer"
@@ -296,7 +268,7 @@ export const TransactionsTable = ({player, transactions, setTransactions}) => {
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Año</SelectLabel>
-            {[2023,2024,2025].map((year) => (
+            {[2023,2024,2025,2026,2027].map((year) => (
               <SelectItem key={year} value={String(year)}>
                 {year}
               </SelectItem>

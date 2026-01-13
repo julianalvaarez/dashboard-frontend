@@ -18,7 +18,7 @@ export const PlayerPage = ({ player }) => {
       <PlayerNav player={player} setTransactions={setTransactions} transactions={transactions} />
 
       {/* 🔹 Tabla de transacciones */}
-      <TransactionsTable player={player} transactions={transactions} setTransactions={setTransactions} />
+      <TransactionsTable transactions={transactions} setTransactions={setTransactions} />
       <Button
         variant="outline"
         onClick={() => exportPlayerExcel(player.name, transactions)}
