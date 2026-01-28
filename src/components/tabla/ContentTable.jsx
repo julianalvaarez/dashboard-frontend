@@ -37,7 +37,7 @@ const totalUsd = transactions.reduce((acc, transaction) => {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className={`${cell.row.original.amount < 0 ? 'text-red-700' : 'text-green-700'}`}>
+                    <TableCell key={cell.id} className={`${cell.row.original.type === "Gasto" ? 'text-red-700' : 'text-green-700'}`}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

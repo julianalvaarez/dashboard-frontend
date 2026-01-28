@@ -1,110 +1,81 @@
-import {useMemo, useState} from "react"
-import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
+import axios from "axios"
+import { useMemo, useState } from "react"
+import { Table, TableHead, TableHeader, TableRow, TableCell, TableBody } from "./ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, } from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Pagination } from "./tabla/Pagination"
-import { ContentTable } from "./tabla/ContentTable"
-import { FiltersTable } from "./tabla/FiltersTable"
-import axios from "axios"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 
-export const TransactionsTable = ({transactions, setTransactions}) => {
-  const today = new Date()
-  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1) // 1–12
-  const [selectedYear, setSelectedYear] = useState(today.getFullYear())
-    // Almacenar las transcacciones en un estado local
+export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions, playerId, setTransactions}) => {
   const [modalEditTransaction, setModalEditTransaction] = useState(false)
   const [editDescription, setEditDescription] = useState('')
+  const [editCurrency, setEditCurrency] = useState('')
   const [editAmount, setEditAmount] = useState(0)
   const [editType, setEditType] = useState('')
   const [editIdTransaction, setEditIdTransaction] = useState(false)
 
-
-  const filteredTransactions = useMemo(() => {
-  return transactions.filter((t) => {
-    const d = new Date(t.date)
-    return (
-      d.getMonth() + 1 === Number(selectedMonth) &&
-      d.getFullYear() === Number(selectedYear)
-    )
-  })
-}, [transactions, selectedMonth, selectedYear])
-
-
-  const deleteTransaction = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
-      try {
-        const { data } = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`);
-
-        console.log(data.message);
-        setTransactions((prev) => prev.filter((t) => t.id !== id));
-      } catch (error) {
-        console.error("Error eliminando transacción:", error);
-      }
-    }
-  };
-
   const openModalEditTransaction = (transaction) => {
     setEditType(transaction.type)
     setEditDescription(transaction.description)
+    setEditCurrency(transaction.currency)
     setEditAmount(transaction.amount)
     setEditIdTransaction(transaction.id)
     setModalEditTransaction(true)
+  }    
+
+  const addFixedTransaction = async (transaction) => {
+    const newTransaction = {...transaction, amount: transaction.amount, type: transaction.type === "Gasto" ? "expense" : "earning", player_id: playerId, date: new Date().toISOString().split('T')[0]}
+    try {
+      const res = await axios.post('https://dashboard-backend-kmpv.onrender.com/transactions', newTransaction)
+      if (res.status !== 200) alert("Hubo un error al agregar la transacción fija. Inténtalo de nuevo.")
+      alert("Transacción agregada exitosamente.")
+      setTransactions((prev) => [...prev, {...newTransaction , id: res.data.id}])
+    } catch (error) {
+      alert("Hubo un error al agregar la transacción fija. Inténtalo de nuevo.")
+      console.log(error);
+    }
+  }
+
+  const deleteFixedTransaction = async (id) => {
+      const {error} = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${id}`)
+      if (!error) {
+          setFixedTransactions(fixedTransactions.filter(t => t.id !== id))
+      }
   }
 
   const editTransaction = async () => {
-    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${editIdTransaction}`, {
+    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${editIdTransaction}`, {
       type: editType,
       description: editDescription,
       amount: parseFloat(editAmount),
+      currency: editCurrency
     })
     if (res.status === 200) {
       alert("Transaccion editada exitosamente.")
-      setTransactions((prev) => prev.map((t) => t.id === editIdTransaction ? {...t, type: editType, description: editDescription, amount: parseFloat(editAmount)} : t))
+      setFixedTransactions((prev) => prev.map((t) => t.id === editIdTransaction ? {...t, type: editType, description: editDescription, amount: parseFloat(editAmount), currency: editCurrency} : t))
       setModalEditTransaction(false)
     } else {
       alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
     }
-  }
+  }  
 
   // Adaptar datos para la tabla
   const data = useMemo(
     () =>
-      filteredTransactions.map((t) => ({
+      fixedTransactions.map((t) => ({
         id: t.id,
         type: t.type === "expense" ? "Gasto" : "Ingreso",
         description: t.description,
         amount: t.amount,
-        date: new Date(t.date).toLocaleDateString("es-AR"),
-        amountUSD:
-          t.type === "expense"
-            ? (t.amount / t.usd_rate).toFixed(2)
-            : (t.amount / t.usd_rate).toFixed(2),
-        usd_rate: t.usd_rate,
+        currency: t.currency
       })),
-    [filteredTransactions]
+    [fixedTransactions]
   )
-
-  const sumAmounts = useMemo(() => {
-    return filteredTransactions.reduce((acc, transaction) => {
-      return transaction.type === "expense"
-        ? acc - transaction.amount
-        : acc + transaction.amount
-    }, 0)
-  }, [filteredTransactions])
-
-
-  // Función para comparar fechas y poder ordenar de mas nuevo a más viejo y viceversa
-  const compareFechas = (a, b) => {
-    const [dA, mA, yA] = a.split('/');
-    const [dB, mB, yB] = b.split('/');
-    return new Date(yA, mA - 1, dA) - new Date(yB, mB - 1, dB);
-  };
 
   // Definir columnas
   const columns = useMemo(() => [
@@ -128,18 +99,6 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
         header: "Tipo",
       },
       {
-        accessorKey: "date",
-        header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting()}> 
-          Fecha
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-        ),
-        sortingFn: (rowA, rowB, columnId) => {
-          return compareFechas(rowA.getValue(columnId), rowB.getValue(columnId));
-        },
-      },
-      {
         accessorKey: "description",
         header: ({ column }) => (
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
@@ -147,6 +106,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
+        
       },
       {
         accessorKey: "amount",
@@ -161,28 +121,12 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
         },
       },
       {
-        accessorKey: "amountUSD",
-        header: () => <div className="text-right">Monto USD</div>,
+        accessorKey: "currency",
+        header: () => <div className="text-right">Moneda</div>,
         cell: ({ row }) => {
-          const amount = parseFloat(row.getValue("amountUSD"))
-          const formatted = new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          }).format(amount)
-          return <div className="text-right font-medium">{formatted}</div>
-        },
-      },
-            {
-        accessorKey: "usd_rate",
-        header: () => <div className="text-right">Valor USD</div>,
-        cell: ({ row }) => {
-          const amount = parseFloat(row.getValue("usd_rate"))
-          const formatted = new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          }).format(amount)
-          return <div className="text-right font-medium">{formatted}</div>
-        },
+          const currency = row.getValue("currency")
+          return <div className="text-right font-medium">{currency}</div>
+        }
       },
       {
         id: "actions",
@@ -200,6 +144,12 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                 <DropdownMenuItem
+                  onClick={() => addFixedTransaction(transaction)}
+                  className="cursor-pointer"
+                >
+                  Agregar a transacciones
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={() => openModalEditTransaction(transaction)}
                   className="cursor-pointer"
                 >
@@ -207,7 +157,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                 </DropdownMenuItem>
               
                 <DropdownMenuItem
-                  onClick={() => deleteTransaction(transaction.id)}
+                  onClick={() => deleteFixedTransaction(transaction.id)}
                   className="text-red-600 focus:text-white focus:bg-red-600 cursor-pointer"
                 >
                   Eliminar
@@ -218,7 +168,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
         },
       },
     ],
-    [setTransactions]
+    [setFixedTransactions]
   )
 
   // 🔹 Estados de la tabla
@@ -236,54 +186,57 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
     },
   })
 
-
   return (
     <>
-    <div className="flex gap-4 my-4">
-      {/* Select Mes */}
-      <Select value={String(selectedMonth)} onValueChange={setSelectedMonth}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Mes" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Mes</SelectLabel>
-            {[
-              "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-              "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
-            ].map((m, i) => (
-              <SelectItem key={i+1} value={String(i+1)}>
-                {m}
-              </SelectItem>
+    <h2 className="text-2xl py-3 mt-10" >Transacciones fijas</h2>
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
             ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className={`${cell.row.original.type === "Gasto" ? 'text-red-700' : 'text-green-700'}`} >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow> 
+              ))  
+                                  
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No hay resultados.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
 
-      {/* Select Año */}
-      <Select value={String(selectedYear)} onValueChange={setSelectedYear}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Año" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>Año</SelectLabel>
-            {[2023,2024,2025,2026,2027].map((year) => (
-              <SelectItem key={year} value={String(year)}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    </div>
-
-      {/* 🔹 Filtro por descripción + botón eliminar seleccionados */}
-        <FiltersTable table={table} setTransactions={setTransactions} />
-
-      {/* 🔹 Tabla */}
-        <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} transactions={filteredTransactions} />
-
+      </div>    
         <Sheet open={modalEditTransaction} onOpenChange={setModalEditTransaction}>
             <SheetContent >
                 <SheetHeader>
@@ -308,12 +261,26 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                       </Select>
                     </div>
                     <div className="grid gap-3">
+                      <Select onValueChange={setEditCurrency} value={editCurrency}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Moneda" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Tipo</SelectLabel>
+                            <SelectItem value="ARS">ARS</SelectItem>
+                            <SelectItem value="USD">USD</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Descripcion</Label>
                         <Input id="sheet-demo-name"  onChange={(e) => setEditDescription(e.target.value)} value={editDescription}  />
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-username">Monto</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setEditAmount(e.target.value)} value={editAmount}  />
+                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setEditAmount(e.target.value)} value={editAmount}  />
                     </div>
                 </div>
                 <SheetFooter>
@@ -323,10 +290,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                     </SheetClose>
                 </SheetFooter>
             </SheetContent>
-        </Sheet>
-
-      {/* 🔹 Paginación + info de filas seleccionadas */}
-        <Pagination table={table} />
+        </Sheet>     
     </>
   )
 }

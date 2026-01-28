@@ -14,6 +14,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const navigate = useNavigate()
   const [editPlayerOpen, setEditPlayerOpen] = useState(false)
   const [addTransactionOpen, setAddTransactionOpen] = useState(false)
+  const [expenseFixedOpen, setExpenseFixedOpen] = useState(false)
 
   const [type, setType] = useState(false)
   const [description, setDescription] = useState('')
@@ -25,7 +26,6 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [inputDate, setInputDate] = useState(new Date())
   const [nameValue, setNameValue] = useState(player.name)
 
-  // Función para editar jugador
   const addTransaction = async () => {
     const data = {
       player_id: player.id,
@@ -35,7 +35,6 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       date: inputTransactionDate.toISOString().split('T')[0],
       currency: currency
     }
-    console.log(data);
     //https://dashboard-backend-kmpv.onrender.com
     const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
     if (res.status === 200) {
@@ -43,7 +42,25 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       setTransactions([data, ...transactions]);
 
     } else {
-      alert("Hubo un error al editar el jugador. Inténtalo de nuevo.")
+      alert("Hubo un error. Inténtalo de nuevo.")
+    }
+  }
+
+  const addTransactionFixed = async () => {
+    const data = {
+      player_id: player.id,
+      type: type,
+      description: description,
+      amount: parseFloat(amount),
+      currency: currency
+    }
+    //https://dashboard-backend-kmpv.onrender.com
+    const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions`, data)
+    if (res.status === 200) {
+      alert("Transaccion fija agregada exitosamente.")
+
+    } else {
+      alert("Hubo un error. Inténtalo de nuevo.")
     }
   }
 
@@ -85,6 +102,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => setAddTransactionOpen(true)} className="cursor-pointer">Crear transacción</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setExpenseFixedOpen(true)} className="cursor-pointer">Crear gasto fijo</DropdownMenuItem>
             <DropdownMenuItem onClick={() => setEditPlayerOpen(true)} className="cursor-pointer">Editar jugador</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel onClick={deletePlayer} className="text-red-600 cursor-pointer hover:text-white hover:bg-red-600 active:bg-red-600 active:text-white rounded-md">
@@ -163,6 +181,52 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                 </div>
                 <SheetFooter>
                     <Button type="submit" onClick={() => {setAddTransactionOpen(false); addTransaction()}}>Guardar transaccion</Button>
+                    <SheetClose asChild>
+                        <Button variant="outline">Cerrar</Button>
+                    </SheetClose>
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
+        <Sheet open={expenseFixedOpen} onOpenChange={setExpenseFixedOpen}  >
+            <SheetContent className="overflow-y-auto" >
+                <SheetHeader>
+                    <SheetTitle>Agregar transacción fija</SheetTitle>
+                    <SheetDescription>
+                        Todos los campos son obligatorios, asegurate de completarlos.
+                    </SheetDescription>
+                </SheetHeader>
+                <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                    <Select onValueChange={setType} value={type}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Tipo de transacción" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Tipo</SelectLabel>
+                          <SelectItem value="expense">Gasto</SelectItem>
+                          <SelectItem value="earning">Ganancia</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-name">Descripcion</Label>
+                        <Input id="sheet-demo-name"  onChange={(e) => setDescription(e.target.value) } value={description}  />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-name">Monto</Label>
+                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
+                    </div>  
+                    <div className="grid gap-3">
+
+                      <Label htmlFor="currency">Moneda</Label>
+                      <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className="border rounded-md p-2" >
+                        <option value="ARS">Pesos (ARS)</option>
+                        <option value="USD">Dólares (USD)</option>
+                      </select>
+                    </div>                
+                </div>
+                <SheetFooter>
+                    <Button type="submit" onClick={() => {setAddTransactionOpen(false); addTransactionFixed()}}>Guardar transaccion fija</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
