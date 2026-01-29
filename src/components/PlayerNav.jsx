@@ -15,7 +15,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [editPlayerOpen, setEditPlayerOpen] = useState(false)
   const [addTransactionOpen, setAddTransactionOpen] = useState(false)
   const [expenseFixedOpen, setExpenseFixedOpen] = useState(false)
-
+  const [isLoading, setIsLoading] = useState(false)
   const [type, setType] = useState(false)
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)  
@@ -23,58 +23,83 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [inputTransactionDate, setInputTransactionDate] = useState(new Date())
 
   // Estados para el formulario
-  const [inputDate, setInputDate] = useState(new Date())
+  const [inputDate, setInputDate] = useState(player.birth_date)
   const [nameValue, setNameValue] = useState(player.name)
 
   const addTransaction = async () => {
-    const data = {
-      player_id: player.id,
-      type: type,
-      description: description,
-      amount: parseFloat(amount),
-      date: inputTransactionDate.toISOString().split('T')[0],
-      currency: currency
-    }
-    //https://dashboard-backend-kmpv.onrender.com
-    const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
-    if (res.status === 200) {
-      alert("Transaccion agregada exitosamente.")
-      setTransactions([data, ...transactions]);
-
-    } else {
-      alert("Hubo un error. Inténtalo de nuevo.")
+    try {
+      setIsLoading(true)
+      const data = {
+        player_id: player.id,
+        type: type,
+        description: description,
+        amount: parseFloat(amount),
+        date: inputTransactionDate.toISOString().split('T')[0],
+        currency: currency
+      }
+      const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
+      if (res.status === 200) {
+        alert("Transaccion agregada exitosamente.")
+        setTransactions([data, ...transactions]);
+      } else {
+        alert("Hubo un error. Inténtalo de nuevo.")
+      }
+    } catch (error) {
+      alert("Error al agregar transacción. Inténtalo de nuevo.")
+      console.error("Error adding transaction:", error);
+    } finally {
+      setIsLoading(false)
+      setAddTransactionOpen(false); 
     }
   }
 
   const addTransactionFixed = async () => {
-    const data = {
-      player_id: player.id,
-      type: type,
-      description: description,
-      amount: parseFloat(amount),
-      currency: currency
-    }
-    //https://dashboard-backend-kmpv.onrender.com
-    const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions`, data)
-    if (res.status === 200) {
-      alert("Transaccion fija agregada exitosamente.")
+    try {
+      setIsLoading(true)
+      const data = {
+        player_id: player.id,
+        type: type,
+        description: description,
+        amount: parseFloat(amount),
+        currency: currency
+      }
+      //https://dashboard-backend-kmpv.onrender.com
+      const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions`, data)
+      if (res.status === 200) {
+        alert("Transaccion fija agregada exitosamente.")
 
-    } else {
-      alert("Hubo un error. Inténtalo de nuevo.")
+      } else {
+        alert("Hubo un error. Inténtalo de nuevo.")
+      }      
+    } catch (error) {
+      alert("Error al agregar transacción fija. Inténtalo de nuevo.")
+      console.error("Error adding fixed transaction:", error);
+    } finally {
+      setIsLoading(false)
+      setAddTransactionOpen(false); 
     }
   }
 
   const editPlayer = async () => {
-    const data = {
-      name: nameValue,
-      birth_date: inputDate.toISOString().split('T')[0],
-    }
-    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
-    if (res.status === 200) {
-      alert("Jugador editado exitosamente.")
-      navigate("/")
-    } else {
-      alert("Hubo un error al editar el jugador. Inténtalo de nuevo.")
+    try {
+      setIsLoading(true)
+      const data = {
+        name: nameValue,
+        birth_date: inputDate.toISOString().split('T')[0],
+      }
+      const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
+      if (res.status === 200) {
+        alert("Jugador editado exitosamente.")
+        navigate("/")
+      } else {
+        alert("Hubo un error al editar el jugador. Inténtalo de nuevo.")
+      }      
+    } catch (error) {
+      alert("Error al editar jugador. Inténtalo de nuevo.")
+      console.error("Error editing player:", error);
+    } finally {
+      setIsLoading(false)
+      setEditPlayerOpen(false);
     }
   }
 
@@ -126,11 +151,11 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-username">Fecha de Nacimiento</Label>
-                        <Calendar mode="single" selected={inputDate} onSelect={setInputDate} className="rounded-md border shadow-sm" captionLayout="dropdown" />
+                        <Calendar mode="single" defaultMonth={new Date(player.birth_date)} selected={inputDate} onSelect={setInputDate} className="rounded-md border shadow-sm" captionLayout="dropdown" />
                     </div>
                 </div>
                 <SheetFooter>
-                    <Button type="submit" onClick={editPlayer}>Guardar jugador</Button>
+                    <Button type="submit" disabled={isLoading} onClick={editPlayer}>{isLoading ? "Guardando..." : "Guardar jugador"}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
@@ -180,7 +205,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </div>               
                 </div>
                 <SheetFooter>
-                    <Button type="submit" onClick={() => {setAddTransactionOpen(false); addTransaction()}}>Guardar transaccion</Button>
+                    <Button type="submit" disabled={isLoading} onClick={() => {addTransaction()}}>{isLoading ? "Guardando..." : "Guardar transacción"}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
@@ -226,7 +251,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </div>                
                 </div>
                 <SheetFooter>
-                    <Button type="submit" onClick={() => {setAddTransactionOpen(false); addTransactionFixed()}}>Guardar transaccion fija</Button>
+                    <Button type="submit" disabled={isLoading} onClick={() => {addTransactionFixed()}}>{isLoading ? "Guardando..." : "Guardar transacción fija"}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
