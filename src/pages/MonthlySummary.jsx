@@ -7,13 +7,13 @@ import { Link } from "react-router-dom";
 import { IoIosArrowBack } from "react-icons/io";
 import { Loading } from "@/components/Loading";
 import { ErrorState } from "@/components/ErrorState";
-import { TransactionsTable } from "@/components/TransactionsTable";
 import { ExpensesChart } from "@/components/ExpensesChart";
 import { useMonthlySummary } from "@/hooks/useMonthlySummary";
 import { useDebounce } from "@/hooks/useDebounce";
 import { MONTHS, YEARS } from "@/utils/constants";
 import { formatCurrency } from "@/utils/formatters";
 import { useState } from "react";
+import { SummaryTable } from "@/components/SummaryTable";
 
 export const MonthlySummary = () => {
   const today = new Date();
@@ -123,7 +123,7 @@ export const MonthlySummary = () => {
       {isLoading ? (
         <Loading message="Cargando transacciones..." />
       ) : (
-        <TransactionsTable transactions={filteredTransactions} />
+        <SummaryTable transactions={filteredTransactions} />
       )}
 
       {/* Gráfico de gastos */}
