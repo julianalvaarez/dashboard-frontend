@@ -12,60 +12,48 @@ import { Pagination } from "./tabla/Pagination"
 import { ContentTable } from "./tabla/ContentTable"
 import { FiltersTable } from "./tabla/FiltersTable"
 import axios from "axios"
+import { MONTHS, YEARS } from "@/utils/constants"
+import { useForm } from "@/hooks/useForm"
+import { ConfirmModal } from "./ConfirmModal"
 
 export const TransactionsTable = ({transactions, setTransactions}) => {
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1) // 1–12
   const [selectedYear, setSelectedYear] = useState(today.getFullYear())
-    // Almacenar las transcacciones en un estado local
-  const [modalEditTransaction, setModalEditTransaction] = useState(false)
-  const [editDescription, setEditDescription] = useState('')
-  const [editAmount, setEditAmount] = useState(0)
-  const [editType, setEditType] = useState('')
-  const [editIdTransaction, setEditIdTransaction] = useState(false)
 
+    // Almacenar las transcacciones en un estado local
+  const [openAlert, setOpenAlert] = useState({isOpen: false, transactionId: null})
+  const [modalEditTransaction, setModalEditTransaction] = useState(false)
+  const initialForm = { description: '', type: '', amount: '', id: null};
+  const { description, type, amount, id, onInputChange, setFormValues } = useForm(initialForm);
 
   const filteredTransactions = useMemo(() => {
-  return transactions.filter((t) => {
-    const d = new Date(t.date)
-    return (
-      d.getMonth() + 1 === Number(selectedMonth) &&
-      d.getFullYear() === Number(selectedYear)
-    )
-  })
-}, [transactions, selectedMonth, selectedYear])
+    return transactions.filter((t) => {
+      const d = new Date(t.date)
+      return (
+        d.getMonth() + 1 === Number(selectedMonth) &&
+        d.getFullYear() === Number(selectedYear)
+      )
+    })
+  }, [transactions, selectedMonth, selectedYear])
 
 
-  const deleteTransaction = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
-      try {
-        const { data } = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`);
-
-        console.log(data.message);
-        setTransactions((prev) => prev.filter((t) => t.id !== id));
-      } catch (error) {
-        console.error("Error eliminando transacción:", error);
-      }
-    }
-  };
 
   const openModalEditTransaction = (transaction) => {
-    setEditType(transaction.type)
-    setEditDescription(transaction.description)
-    setEditAmount(transaction.amount)
-    setEditIdTransaction(transaction.id)
+    setFormValues({
+      description: transaction.description,
+      type: transaction.type === "Gasto" ? "expense" : "earning",
+      amount: transaction.amount,
+      id: transaction.id,
+    });
     setModalEditTransaction(true)
   }
 
   const editTransaction = async () => {
-    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${editIdTransaction}`, {
-      type: editType,
-      description: editDescription,
-      amount: parseFloat(editAmount),
-    })
+    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`, { type, description, amount: parseFloat(amount) })
     if (res.status === 200) {
       alert("Transaccion editada exitosamente.")
-      setTransactions((prev) => prev.map((t) => t.id === editIdTransaction ? {...t, type: editType, description: editDescription, amount: parseFloat(editAmount)} : t))
+      setTransactions((prev) => prev.map((t) => t.id === id ? {...t, type, description, amount: parseFloat(amount)} : t))
       setModalEditTransaction(false)
     } else {
       alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
@@ -207,7 +195,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                 </DropdownMenuItem>
               
                 <DropdownMenuItem
-                  onClick={() => deleteTransaction(transaction.id)}
+                  onClick={() => setOpenAlert({isOpen: true, transactionId: transaction.id})}
                   className="text-red-600 focus:text-white focus:bg-red-600 cursor-pointer"
                 >
                   Eliminar
@@ -248,10 +236,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Mes</SelectLabel>
-            {[
-              "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-              "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
-            ].map((m, i) => (
+            {MONTHS.map((m, i) => (
               <SelectItem key={i+1} value={String(i+1)}>
                 {m}
               </SelectItem>
@@ -268,7 +253,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Año</SelectLabel>
-            {[2023,2024,2025,2026,2027].map((year) => (
+            {YEARS.map((year) => (
               <SelectItem key={year} value={String(year)}>
                 {year}
               </SelectItem>
@@ -280,10 +265,9 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
 
       {/* 🔹 Filtro por descripción + botón eliminar seleccionados */}
         <FiltersTable table={table} setTransactions={setTransactions} />
-
       {/* 🔹 Tabla */}
         <ContentTable table={table} columns={columns} sumAmounts={sumAmounts} transactions={filteredTransactions} />
-
+        <ConfirmModal open={openAlert} setOpen={setOpenAlert} setTransactions={setTransactions} />
         <Sheet open={modalEditTransaction} onOpenChange={setModalEditTransaction}>
             <SheetContent >
                 <SheetHeader>
@@ -294,7 +278,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                 </SheetHeader>
                 <div className="grid flex-1 auto-rows-min gap-6 px-4">
                     <div className="grid gap-3">
-                      <Select onValueChange={setEditType} value={editType}>
+                      <Select onValueChange={onInputChange} name="type" value={type}>
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Tipo de transacción" />
                         </SelectTrigger>
@@ -309,11 +293,11 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Descripcion</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setEditDescription(e.target.value)} value={editDescription}  />
+                        <Input id="sheet-demo-name"  onChange={onInputChange} name="description" value={description}  />
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-username">Monto</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setEditAmount(e.target.value)} value={editAmount}  />
+                        <Input id="sheet-demo-name"  onChange={onInputChange} name="amount" value={amount}  />
                     </div>
                 </div>
                 <SheetFooter>

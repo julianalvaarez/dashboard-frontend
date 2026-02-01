@@ -10,21 +10,22 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { useForm } from "@/hooks/useForm"
 
 export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions, playerId, setTransactions}) => {
   const [modalEditTransaction, setModalEditTransaction] = useState(false)
-  const [editDescription, setEditDescription] = useState('')
-  const [editCurrency, setEditCurrency] = useState('')
-  const [editAmount, setEditAmount] = useState(0)
-  const [editType, setEditType] = useState('')
-  const [editIdTransaction, setEditIdTransaction] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const initialForm = { type: '', id: '', description: '', currency: '', amount: 0 }
+  const { type, description, id, currency, amount, onInputChange, setFormValues, onSelectChange } = useForm(initialForm)
 
   const openModalEditTransaction = (transaction) => {
-    setEditType(transaction.type)
-    setEditDescription(transaction.description)
-    setEditCurrency(transaction.currency)
-    setEditAmount(transaction.amount)
-    setEditIdTransaction(transaction.id)
+    setFormValues({
+      type: transaction.type === "Gasto" ? "expense" : "earning",
+      id: transaction.id,
+      description: transaction.description,
+      currency: transaction.currency,
+      amount: transaction.amount
+    })
     setModalEditTransaction(true)
   }    
 
@@ -49,18 +50,21 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
   }
 
   const editTransaction = async () => {
-    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${editIdTransaction}`, {
-      type: editType,
-      description: editDescription,
-      amount: parseFloat(editAmount),
-      currency: editCurrency
-    })
-    if (res.status === 200) {
-      alert("Transaccion editada exitosamente.")
-      setFixedTransactions((prev) => prev.map((t) => t.id === editIdTransaction ? {...t, type: editType, description: editDescription, amount: parseFloat(editAmount), currency: editCurrency} : t))
+    try {
+      setIsLoading(true)
+      const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${id}`, { type, description, amount: parseFloat(amount), currency })
+      if (res.status === 200) {
+        alert("Transacción editada exitosamente.")
+        setFixedTransactions((prev) => prev.map((t) => t.id === id ? {...t, type, description, amount: parseFloat(amount), currency} : t))
+      } else {
+        alert("Hubo un error al editar la transacción. Inténtalo de nuevo.")
+      }
+    } catch (error) {
+      alert("Hubo un error al editar la transacción. Inténtalo de nuevo.")
+      console.error("Error editing transaction:", error);
+    } finally {
+      setIsLoading(false)
       setModalEditTransaction(false)
-    } else {
-      alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
     }
   }  
 
@@ -247,7 +251,7 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
                 </SheetHeader>
                 <div className="grid flex-1 auto-rows-min gap-6 px-4">
                     <div className="grid gap-3">
-                      <Select onValueChange={setEditType} value={editType}>
+                      <Select onValueChange={(value) => onSelectChange('type', value)} value={type} name="type">
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Tipo de transacción" />
                         </SelectTrigger>
@@ -261,7 +265,7 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
                       </Select>
                     </div>
                     <div className="grid gap-3">
-                      <Select onValueChange={setEditCurrency} value={editCurrency}>
+                      <Select onValueChange={(value) => onSelectChange('currency', value)} value={currency} name="currency">
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Moneda" />
                         </SelectTrigger>
@@ -276,15 +280,15 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Descripcion</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setEditDescription(e.target.value)} value={editDescription}  />
+                        <Input id="sheet-demo-name"  onChange={onInputChange} value={description} name="description" />
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-username">Monto</Label>
-                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setEditAmount(e.target.value)} value={editAmount}  />
+                        <Input id="sheet-demo-name" type={"number"}  onChange={onInputChange} value={amount} name="amount" />
                     </div>
                 </div>
                 <SheetFooter>
-                    <Button type="submit" onClick={editTransaction}>Guardar transaccion</Button>
+                    <Button type="submit" disabled={isLoading} className='cursor-pointer' onClick={() => {editTransaction()}}>{isLoading ? "Guardando..." : "Editar"}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>

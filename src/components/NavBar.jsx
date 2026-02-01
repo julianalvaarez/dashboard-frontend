@@ -1,4 +1,4 @@
-import {useContext, useState} from 'react';
+import {useContext} from 'react';
 import axios from 'axios';
 import { ContextApp } from "@/context/ContextApp"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
 import { Link } from 'react-router-dom';
 import { Menu } from "lucide-react"
+import { useForm } from '@/hooks/useForm';
 
 
 
@@ -15,8 +16,8 @@ export const NavBar = () => {
     const {getPlayers} = useContext(ContextApp)
 
     // Estados para el formulario
-    const [inputDate, setInputDate] = useState(new Date())
-    const [nameValue, setNameValue] = useState('')
+    const initialForm = { name: '', birth_date: null, position: '', transfermarkt: '', video: '', notes: ''};
+    const { name, birth_date, position, transfermarkt, video, notes, onInputChange, onSelectChange } = useForm(initialForm);
   
     // Mostrar mes actual
     const currentDate = new Date();
@@ -25,10 +26,7 @@ export const NavBar = () => {
     
     // Función para agregar jugador
     const addPlayer = async () => {
-        const data = {
-            name: nameValue,
-            birth_date: inputDate.toISOString().split('T')[0],
-        }
+        const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
         const res = await axios.post("https://dashboard-backend-kmpv.onrender.com/players", data)
         if (res.status === 200) {
             alert("Jugador agregado exitosamente.")
@@ -67,7 +65,7 @@ export const NavBar = () => {
             <SheetTrigger asChild>
               <button className="font-semibold cursor-pointer hover:underline">Agregar jugador</button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent  className="overflow-y-scroll">
               <SheetHeader>
                 <SheetTitle>Agregar jugador</SheetTitle>
                 <SheetDescription>
@@ -77,21 +75,27 @@ export const NavBar = () => {
               <div className="grid flex-1 auto-rows-min gap-6 px-4 py-6">
                 <div className="grid gap-3">
                   <Label htmlFor="player-name">Nombre Completo</Label>
-                  <Input
-                    id="player-name"
-                    onChange={(e) => setNameValue(e.target.value)}
-                    value={nameValue}
-                  />
+                  <Input id="player-name" onChange={onInputChange} value={name} name="name" />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="player-position">Posicion</Label>
+                  <Input id="player-position" onChange={onInputChange} value={position} name="position" />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="player-transfermarkt">Transfermarkt</Label>
+                  <Input id="player-transfermarkt" onChange={onInputChange} value={transfermarkt} name="transfermarkt" />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="player-video">Video</Label>
+                  <Input id="player-video" onChange={onInputChange} value={video} name="video" />
+                </div>
+                <div className="grid gap-3">
+                  <Label htmlFor="player-notes">Notas Adicionales</Label>
+                  <Input id="player-notes" type="textarea" onChange={onInputChange} value={notes} name="notes" />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="player-birthday">Fecha de Nacimiento</Label>
-                  <Calendar
-                    mode="single"
-                    selected={inputDate}
-                    onSelect={setInputDate}
-                    className="rounded-md border shadow-sm"
-                    captionLayout="dropdown"
-                  />
+                  <Calendar mode="single" selected={birth_date} onSelect={(date) => onSelectChange("birth_date", date)} className="rounded-md border shadow-sm" captionLayout="dropdown" />
                 </div>
               </div>
               <SheetFooter>
@@ -132,7 +136,7 @@ export const NavBar = () => {
                     <SheetTrigger asChild>
                       <button className="block text-base font-medium hover:text-primary">Agregar jugador</button>
                     </SheetTrigger>
-                    <SheetContent>
+                    <SheetContent className="overflow-y-auto">
                       <SheetHeader>
                         <SheetTitle>Agregar jugador</SheetTitle>
                         <SheetDescription>
@@ -144,16 +148,55 @@ export const NavBar = () => {
                           <Label htmlFor="player-name-mobile">Nombre Completo</Label>
                           <Input
                             id="player-name-mobile"
-                            onChange={(e) => setNameValue(e.target.value)}
-                            value={nameValue}
+                            onChange={onInputChange}
+                            value={name}
+                            name="name"
+                          />
+                        </div>
+                        <div>
+                            <Label htmlFor="player-position-mobile">Posicion</Label>
+                            <Input
+                              id="player-position-mobile"
+                              onChange={onInputChange}
+                              value={position}
+                              name="position"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="player-transfermarkt-mobile">Transfermarkt</Label>
+                            <Input
+                              id="player-transfermarkt-mobile"
+                              onChange={onInputChange}
+                              value={transfermarkt}
+                              name="transfermarkt"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="player-video-mobile">Video</Label>
+                            <Input
+                              id="player-video-mobile"
+                              onChange={onInputChange}
+                              value={video}
+                              name="video"
+                            />
+                        </div>
+                        <div>
+                          <Label htmlFor="player-notes-mobile">Notas Adicionales</Label>
+                          <Input
+                            id="player-notes-mobile"
+                            type="textarea"
+                            onChange={onInputChange}
+                            value={notes}
+                            name="notes"
                           />
                         </div>
                         <div className="grid gap-3">
                           <Label htmlFor="player-birthday-mobile">Fecha de Nacimiento</Label>
                           <Calendar
                             mode="single"
-                            selected={inputDate}
-                            onSelect={setInputDate}
+                            selected={birth_date}
+                            onSelect={(date) => onSelectChange('birth_date', date)} 
+                            name="birth_date"
                             className="rounded-md border shadow-sm"
                             captionLayout="dropdown"
                           />

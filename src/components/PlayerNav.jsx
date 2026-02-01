@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
+import { useForm } from "@/hooks/useForm";
 
 export const PlayerNav = ({player, transactions, setTransactions}) => {
   const navigate = useNavigate()
@@ -16,30 +17,28 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const [addTransactionOpen, setAddTransactionOpen] = useState(false)
   const [expenseFixedOpen, setExpenseFixedOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [type, setType] = useState(false)
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState(0)  
-  const [currency, setCurrency] = useState('ARS')
-  const [inputTransactionDate, setInputTransactionDate] = useState(new Date())
 
-  // Estados para el formulario
-  const [inputDate, setInputDate] = useState(player.birth_date)
-  const [nameValue, setNameValue] = useState(player.name)
+  const transactionInitialForm = { player_id: player.id, type: '', description: '', amount: 0, date: new Date(), currency: 'ARS' };
+  const { type, description, amount, currency, date, onInputChange: onTransactionInputChange, onSelectChange: onTransactionSelectChange } = useForm(transactionInitialForm);
+    // Estados para el formulario
+    const playerInitialForm = { name: '', birth_date: null, position: '', transfermarkt: '', video: '', notes: ''};
+    const { name, birth_date, position, transfermarkt, video, notes, onInputChange: onPlayerInputChange, setFormValues, onSelectChange: onPlayerSelectChange } = useForm(playerInitialForm);
 
   const addTransaction = async () => {
     try {
       setIsLoading(true)
       const data = {
         player_id: player.id,
-        type: type,
-        description: description,
+        type,
+        description,
         amount: parseFloat(amount),
-        date: inputTransactionDate.toISOString().split('T')[0],
-        currency: currency
+        date: date.toISOString().split('T')[0],
+        currency
       }
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
       if (res.status === 200) {
         alert("Transaccion agregada exitosamente.")
+        console.log(data);
         setTransactions([data, ...transactions]);
       } else {
         alert("Hubo un error. Inténtalo de nuevo.")
@@ -53,15 +52,15 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
     }
   }
 
-  const addTransactionFixed = async () => {
+  const addFixedTransaction = async () => {
     try {
       setIsLoading(true)
       const data = {
         player_id: player.id,
-        type: type,
-        description: description,
+        type,
+        description,
         amount: parseFloat(amount),
-        currency: currency
+        currency
       }
       //https://dashboard-backend-kmpv.onrender.com
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions`, data)
@@ -83,10 +82,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
   const editPlayer = async () => {
     try {
       setIsLoading(true)
-      const data = {
-        name: nameValue,
-        birth_date: inputDate.toISOString().split('T')[0],
-      }
+      const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
       if (res.status === 200) {
         alert("Jugador editado exitosamente.")
@@ -117,6 +113,18 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
     }
   }
 
+  const openEditPlayerForm = () => {
+    setFormValues({
+      name: player.name,
+      birth_date: new Date(player.birth_date),
+      position: player.position,
+      transfermarkt: player.transfermarkt,
+      video: player.video,
+      notes: player.notes
+    })
+    setEditPlayerOpen(true);
+  }
+
   return (
     <>
       <div className="flex justify-between items-center p-6 border-b">
@@ -128,7 +136,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => setAddTransactionOpen(true)} className="cursor-pointer">Crear transacción</DropdownMenuItem>
             <DropdownMenuItem onClick={() => setExpenseFixedOpen(true)} className="cursor-pointer">Crear gasto fijo</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setEditPlayerOpen(true)} className="cursor-pointer">Editar jugador</DropdownMenuItem>
+            <DropdownMenuItem onClick={openEditPlayerForm} className="cursor-pointer">Editar jugador</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel onClick={deletePlayer} className="text-red-600 cursor-pointer hover:text-white hover:bg-red-600 active:bg-red-600 active:text-white rounded-md">
               Eliminar jugador  
@@ -137,7 +145,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
         </DropdownMenu>    
       </div>    
         <Sheet open={editPlayerOpen} onOpenChange={setEditPlayerOpen} >
-            <SheetContent >
+            <SheetContent className="overflow-y-auto" >
                 <SheetHeader>
                     <SheetTitle>Editar jugador</SheetTitle>
                     <SheetDescription>
@@ -147,11 +155,27 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                 <div className="grid flex-1 auto-rows-min gap-6 px-4">
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Nombre Completo</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setNameValue(e.target.value)} value={nameValue}  />
+                        <Input id="sheet-demo-name"  onChange={onPlayerInputChange} value={name} name="name" />
                     </div>
                     <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-username">Fecha de Nacimiento</Label>
-                        <Calendar mode="single" defaultMonth={new Date(player.birth_date)} selected={inputDate} onSelect={setInputDate} className="rounded-md border shadow-sm" captionLayout="dropdown" />
+                        <Label htmlFor="sheet-demo-position">Posicion</Label>
+                        <Input id="sheet-demo-position"  onChange={onPlayerInputChange} value={position} name="position" />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-transfermarkt">Transfermarkt</Label>
+                        <Input id="sheet-demo-transfermarkt"  onChange={onPlayerInputChange} value={transfermarkt} name="transfermarkt" />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-video">Video</Label>
+                        <Input id="sheet-demo-video"  onChange={onPlayerInputChange} value={video} name="video" />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-birthdate">Fecha de Nacimiento</Label>
+                        <Calendar mode="single" defaultMonth={new Date(player.birth_date)} selected={birth_date} onSelect={(date) => onPlayerSelectChange("birth_date", date)} name="birth_date" className="rounded-md border shadow-sm" captionLayout="dropdown" />
+                    </div>
+                    <div className="grid gap-3">
+                        <Label htmlFor="sheet-demo-notes">Notas Adicionales</Label>
+                        <Input id="sheet-demo-notes"  onChange={onPlayerInputChange} value={notes} name="notes" />
                     </div>
                 </div>
                 <SheetFooter>
@@ -171,7 +195,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </SheetDescription>
                 </SheetHeader>
                 <div className="grid flex-1 auto-rows-min gap-6 px-4">
-                    <Select onValueChange={setType} value={type}>
+                    <Select onValueChange={(value) => onTransactionSelectChange('type', value)} name="type" value={type}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Tipo de transacción" />
                       </SelectTrigger>
@@ -185,23 +209,30 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </Select>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Descripcion</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setDescription(e.target.value) } value={description}  />
+                        <Input id="sheet-demo-name"  onChange={onTransactionInputChange} name="description" value={description}  />
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Monto</Label>
-                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
+                        <Input id="sheet-demo-name" type={"number"}  onChange={onTransactionInputChange} name="amount" value={amount}  />
                     </div>  
                     <div className="grid gap-3">
-
                       <Label htmlFor="currency">Moneda</Label>
-                      <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className="border rounded-md p-2" >
-                        <option value="ARS">Pesos (ARS)</option>
-                        <option value="USD">Dólares (USD)</option>
-                      </select>
+                      <Select onValueChange={(value) => onTransactionSelectChange('currency', value)} name="currency" value={currency}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Moneda" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Moneda</SelectLabel>
+                            <SelectItem value="ARS">Pesos (ARS)</SelectItem>
+                            <SelectItem value="USD">Dólares (USD)</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </div>     
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-username">Fecha de Pago</Label>
-                        <Calendar mode="single" selected={inputTransactionDate} onSelect={setInputTransactionDate} className="rounded-md border shadow-sm" captionLayout="dropdown" />
+                        <Calendar mode="single" selected={date} onSelect={(date) => onTransactionSelectChange("date", date)} name="date" className="rounded-md border shadow-sm" captionLayout="dropdown" />
                     </div>               
                 </div>
                 <SheetFooter>
@@ -221,7 +252,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </SheetDescription>
                 </SheetHeader>
                 <div className="grid flex-1 auto-rows-min gap-6 px-4">
-                    <Select onValueChange={setType} value={type}>
+                    <Select onValueChange={(value) => onTransactionSelectChange('type', value)} name="type" value={type}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Tipo de transacción" />
                       </SelectTrigger>
@@ -235,23 +266,31 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </Select>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Descripcion</Label>
-                        <Input id="sheet-demo-name"  onChange={(e) => setDescription(e.target.value) } value={description}  />
+                        <Input id="sheet-demo-name"  onChange={onTransactionInputChange} name="description" value={description}  />
                     </div>
                     <div className="grid gap-3">
                         <Label htmlFor="sheet-demo-name">Monto</Label>
-                        <Input id="sheet-demo-name" type={"number"}  onChange={(e) => setAmount(e.target.value) } value={amount}  />
+                        <Input id="sheet-demo-name" type={"number"}  onChange={onTransactionInputChange} name="amount" value={amount}  />
                     </div>  
                     <div className="grid gap-3">
 
                       <Label htmlFor="currency">Moneda</Label>
-                      <select id="currency" value={currency} onChange={(e) => setCurrency(e.target.value)} className="border rounded-md p-2" >
-                        <option value="ARS">Pesos (ARS)</option>
-                        <option value="USD">Dólares (USD)</option>
-                      </select>
+                      <Select onValueChange={(value) => onTransactionSelectChange('currency', value)} name="currency" value={currency}>
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Moneda" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Moneda</SelectLabel>
+                            <SelectItem value="ARS">Pesos (ARS)</SelectItem>
+                            <SelectItem value="USD">Dólares (USD)</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </div>                
                 </div>
                 <SheetFooter>
-                    <Button type="submit" disabled={isLoading} onClick={() => {addTransactionFixed()}}>{isLoading ? "Guardando..." : "Guardar transacción fija"}</Button>
+                    <Button type="submit" disabled={isLoading} onClick={() => {addFixedTransaction()}}>{isLoading ? "Guardando..." : "Guardar transacción fija"}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
