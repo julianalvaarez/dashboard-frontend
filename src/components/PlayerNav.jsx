@@ -75,7 +75,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
       console.error("Error adding fixed transaction:", error);
     } finally {
       setIsLoading(false)
-      setAddTransactionOpen(false); 
+      setExpenseFixedOpen(false); 
     }
   }
 
@@ -290,7 +290,7 @@ export const PlayerNav = ({player, transactions, setTransactions}) => {
                     </div>                
                 </div>
                 <SheetFooter>
-                    <Button type="submit" disabled={isLoading} onClick={() => {addFixedTransaction()}}>{isLoading ? "Guardando..." : "Guardar transacción fija"}</Button>
+                    <Button type="submit" disabled={isLoading} className='cursor-pointer' onClick={() => {addFixedTransaction()}}>{isLoading ? "Guardando..." : "Guardar transacción fija"}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
