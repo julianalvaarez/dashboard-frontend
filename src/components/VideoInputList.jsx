@@ -1,7 +1,7 @@
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Plus, Trash } from "lucide-react";
-import { Label } from "./ui/Label";
+import { Label } from "./ui/label";
 
 export const VideoInputList = ({ video = [''], onVideoChange, addVideoInput, removeVideoInput }) => {
     return (
