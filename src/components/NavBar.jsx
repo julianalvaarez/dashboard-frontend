@@ -9,7 +9,7 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 import { Link } from 'react-router-dom';
 import { Menu, Plus, Trash } from "lucide-react"
 import { useForm } from '@/hooks/useForm';
-import { VideoInputList } from './ui/VideoInputList';
+import { VideoInputList } from './VideoInputList';
 
 
 

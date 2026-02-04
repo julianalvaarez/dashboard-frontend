@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import { useForm } from "@/hooks/useForm";
-import { VideoInputList } from "./ui/VideoInputList";
+import { VideoInputList } from "./VideoInputList";
 
 export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const navigate = useNavigate()
