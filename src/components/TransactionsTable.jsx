@@ -20,7 +20,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
   const today = new Date()
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1) // 1–12
   const [selectedYear, setSelectedYear] = useState(today.getFullYear())
-
+  const [isLoading, setIsLoading] = useState(false)
     // Almacenar las transcacciones en un estado local
   const [openAlert, setOpenAlert] = useState({isOpen: false, transactionId: null})
   const [modalEditTransaction, setModalEditTransaction] = useState(false)
@@ -50,13 +50,21 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
   }
 
   const editTransaction = async () => {
-    const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`, { type, description, amount: parseFloat(amount) })
-    if (res.status === 200) {
-      alert("Transaccion editada exitosamente.")
-      setTransactions((prev) => prev.map((t) => t.id === id ? {...t, type, description, amount: parseFloat(amount)} : t))
-      setModalEditTransaction(false)
-    } else {
+    try {
+      setIsLoading(true)
+      const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`, { type, description, amount: parseFloat(amount) })
+      if (res.status === 200) {
+        alert("Transaccion editada exitosamente.")
+        setTransactions((prev) => prev.map((t) => t.id === id ? {...t, type, description, amount: parseFloat(amount)} : t))
+      } else {
+        alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
+      }
+    } catch (error) {
       alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
+      console.error(error);
+    } finally {
+      setIsLoading(false)
+      setModalEditTransaction(false)
     }
   }
 
@@ -301,7 +309,7 @@ export const TransactionsTable = ({transactions, setTransactions}) => {
                     </div>
                 </div>
                 <SheetFooter>
-                    <Button type="submit" onClick={editTransaction}>Guardar transaccion</Button>
+                    <Button type="submit" className='cursor-pointer' disabled={isLoading} onClick={editTransaction}>{isLoading ? 'Cargando...' : 'Editar'}</Button>
                     <SheetClose asChild>
                         <Button variant="outline">Cerrar</Button>
                     </SheetClose>
