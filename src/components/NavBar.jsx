@@ -1,4 +1,4 @@
-import {useContext} from 'react';
+import { useContext } from 'react';
 import axios from 'axios';
 import { ContextApp } from "@/context/ContextApp"
 import { Button } from "@/components/ui/button"
@@ -7,34 +7,35 @@ import { Calendar } from "@/components/ui/calendar"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
 import { Link } from 'react-router-dom';
-import { Menu } from "lucide-react"
+import { Menu, Plus, Trash } from "lucide-react"
 import { useForm } from '@/hooks/useForm';
+import { VideoInputList } from './ui/VideoInputList';
 
 
 
 export const NavBar = () => {
-    const {getPlayers} = useContext(ContextApp)
+  const { getPlayers } = useContext(ContextApp)
 
-    // Estados para el formulario
-    const initialForm = { name: '', birth_date: null, position: '', transfermarkt: '', video: '', notes: ''};
-    const { name, birth_date, position, transfermarkt, video, notes, onInputChange, onSelectChange } = useForm(initialForm);
-  
-    // Mostrar mes actual
-    const currentDate = new Date();
-    const month = currentDate.toLocaleString("default", { month: "long" });
-    const year = currentDate.getFullYear();
-    
-    // Función para agregar jugador
-    const addPlayer = async () => {
-        const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
-        const res = await axios.post("https://dashboard-backend-kmpv.onrender.com/players", data)
-        if (res.status === 200) {
-            alert("Jugador agregado exitosamente.")
-            getPlayers()
-        } else {
-            alert("Hubo un error al agregar el jugador. Inténtalo de nuevo.")
-        }
+  // Estados para el formulario
+  const initialForm = { name: '', birth_date: null, position: '', transfermarkt: '', video: [''], notes: '' };
+  const { name, birth_date, position, transfermarkt, video, notes, onInputChange, onSelectChange, addVideoInput, removeVideoInput, onVideoChange } = useForm(initialForm);
+
+  // Mostrar mes actual
+  const currentDate = new Date();
+  const month = currentDate.toLocaleString("default", { month: "long" });
+  const year = currentDate.getFullYear();
+
+  // Función para agregar jugador
+  const addPlayer = async () => {
+    const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
+    const res = await axios.post("https://dashboard-backend-kmpv.onrender.com/players", data)
+    if (res.status === 200) {
+      alert("Jugador agregado exitosamente.")
+      getPlayers()
+    } else {
+      alert("Hubo un error al agregar el jugador. Inténtalo de nuevo.")
     }
+  }
 
   return (
     <header className="w-full border-b bg-gradient-to-r from-slate-50 to-slate-100 shadow-md mb-12">
@@ -65,7 +66,7 @@ export const NavBar = () => {
             <SheetTrigger asChild>
               <button className="font-semibold cursor-pointer hover:underline">Agregar jugador</button>
             </SheetTrigger>
-            <SheetContent  className="overflow-y-scroll">
+            <SheetContent className="overflow-y-scroll">
               <SheetHeader>
                 <SheetTitle>Agregar jugador</SheetTitle>
                 <SheetDescription>
@@ -85,10 +86,13 @@ export const NavBar = () => {
                   <Label htmlFor="player-transfermarkt">Transfermarkt</Label>
                   <Input id="player-transfermarkt" onChange={onInputChange} value={transfermarkt} name="transfermarkt" />
                 </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="player-video">Video</Label>
-                  <Input id="player-video" onChange={onInputChange} value={video} name="video" />
-                </div>
+                <VideoInputList
+                  video={video}
+                  onVideoChange={onVideoChange}
+                  addVideoInput={addVideoInput}
+                  removeVideoInput={removeVideoInput}
+                />
+
                 <div className="grid gap-3">
                   <Label htmlFor="player-notes">Notas Adicionales</Label>
                   <Input id="player-notes" type="textarea" onChange={onInputChange} value={notes} name="notes" />
@@ -154,32 +158,29 @@ export const NavBar = () => {
                           />
                         </div>
                         <div>
-                            <Label htmlFor="player-position-mobile">Posicion</Label>
-                            <Input
-                              id="player-position-mobile"
-                              onChange={onInputChange}
-                              value={position}
-                              name="position"
-                            />
+                          <Label htmlFor="player-position-mobile">Posicion</Label>
+                          <Input
+                            id="player-position-mobile"
+                            onChange={onInputChange}
+                            value={position}
+                            name="position"
+                          />
                         </div>
                         <div>
-                            <Label htmlFor="player-transfermarkt-mobile">Transfermarkt</Label>
-                            <Input
-                              id="player-transfermarkt-mobile"
-                              onChange={onInputChange}
-                              value={transfermarkt}
-                              name="transfermarkt"
-                            />
+                          <Label htmlFor="player-transfermarkt-mobile">Transfermarkt</Label>
+                          <Input
+                            id="player-transfermarkt-mobile"
+                            onChange={onInputChange}
+                            value={transfermarkt}
+                            name="transfermarkt"
+                          />
                         </div>
-                        <div>
-                            <Label htmlFor="player-video-mobile">Video</Label>
-                            <Input
-                              id="player-video-mobile"
-                              onChange={onInputChange}
-                              value={video}
-                              name="video"
-                            />
-                        </div>
+                        <VideoInputList
+                          video={video}
+                          onVideoChange={onVideoChange}
+                          addVideoInput={addVideoInput}
+                          removeVideoInput={removeVideoInput}
+                        />
                         <div>
                           <Label htmlFor="player-notes-mobile">Notas Adicionales</Label>
                           <Input
@@ -195,7 +196,7 @@ export const NavBar = () => {
                           <Calendar
                             mode="single"
                             selected={birth_date}
-                            onSelect={(date) => onSelectChange('birth_date', date)} 
+                            onSelect={(date) => onSelectChange('birth_date', date)}
                             name="birth_date"
                             className="rounded-md border shadow-sm"
                             captionLayout="dropdown"
