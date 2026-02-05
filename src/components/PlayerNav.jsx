@@ -11,6 +11,9 @@ import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import { useForm } from "@/hooks/useForm";
 import { VideoInputList } from "./VideoInputList";
+import { toast } from "sonner";
+import { Textarea } from "./ui/textarea";
+import { yearsCalculator } from "@/lib/yearsCalculator";
 
 export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const navigate = useNavigate()
@@ -38,14 +41,14 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       }
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
       if (res.status === 200) {
-        alert("Transaccion agregada exitosamente.")
+        toast.success("Transacción agregada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
         console.log(data);
         setTransactions([data, ...transactions]);
       } else {
-        alert("Hubo un error. Inténtalo de nuevo.")
+        toast.error("Error al agregar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
     } catch (error) {
-      alert("Error al agregar transacción. Inténtalo de nuevo.")
+      toast.error("Error al agregar transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       console.error("Error adding transaction:", error);
     } finally {
       setIsLoading(false)
@@ -66,18 +69,24 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       //https://dashboard-backend-kmpv.onrender.com
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions`, data)
       if (res.status === 200) {
-        alert("Transaccion fija agregada exitosamente.")
+        toast.success("Transacción fija agregada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
 
       } else {
-        alert("Hubo un error. Inténtalo de nuevo.")
+        toast.error("Error al agregar transacción fija", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
     } catch (error) {
-      alert("Error al agregar transacción fija. Inténtalo de nuevo.")
+      toast.error("Error al agregar transacción fija", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       console.error("Error adding fixed transaction:", error);
     } finally {
       setIsLoading(false)
       setExpenseFixedOpen(false);
     }
+  }
+
+  const copyDataPlayer = () => {
+    const playerData = `${player.name}\n${yearsCalculator(player.birth_date)} Años\n${player.position}\n${player.notes}\nTransfermarkt: ${player.transfermarkt}\n${player?.video.map((video, index) => `Video ${index + 1}: ${video}`).join('\n')}`;
+    navigator.clipboard.writeText(playerData);
+    toast.success("Datos copiados al portapapeles", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
   }
 
   const editPlayer = async () => {
@@ -86,13 +95,13 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
       if (res.status === 200) {
-        alert("Jugador editado exitosamente.")
+        toast.success("Jugador editado exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
         navigate("/")
       } else {
-        alert("Hubo un error al editar el jugador. Inténtalo de nuevo.")
+        toast.error("Error al editar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
     } catch (error) {
-      alert("Error al editar jugador. Inténtalo de nuevo.")
+      toast.error("Error al editar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       console.error("Error editing player:", error);
     } finally {
       setIsLoading(false)
@@ -106,10 +115,10 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       const res = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`)
       console.log(res.status);
       if (res.status === 200) {
-        alert("Jugador eliminado exitosamente.")
+        toast.success("Jugador eliminado exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
         navigate("/")
       } else {
-        alert("Hubo un error al eliminar el jugador. Inténtalo de nuevo.")
+        toast.error("Error al eliminar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
     }
   }
@@ -137,6 +146,8 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => setAddTransactionOpen(true)} className="cursor-pointer">Crear transacción</DropdownMenuItem>
             <DropdownMenuItem onClick={() => setExpenseFixedOpen(true)} className="cursor-pointer">Crear gasto fijo</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={copyDataPlayer} className="cursor-pointer">Copiar placa</DropdownMenuItem>
             <DropdownMenuItem onClick={openEditPlayerForm} className="cursor-pointer">Editar jugador</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel onClick={deletePlayer} className="text-red-600 cursor-pointer hover:text-white hover:bg-red-600 active:bg-red-600 active:text-white rounded-md">
@@ -178,7 +189,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
             </div>
             <div className="grid gap-3">
               <Label htmlFor="sheet-demo-notes">Notas Adicionales</Label>
-              <Input id="sheet-demo-notes" onChange={onPlayerInputChange} value={notes} name="notes" />
+              <Textarea id="sheet-demo-notes"  onChange={onPlayerInputChange} value={notes} name="notes" />
             </div>
           </div>
           <SheetFooter>

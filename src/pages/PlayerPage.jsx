@@ -11,6 +11,7 @@ import { PlayerUtilityChart } from "@/components/PlayerUtilityChart";
 import { getChartData } from "@/helpers/getChartData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { toast } from "sonner";
 
 export const PlayerPage = ({ player }) => {
   const [transactions, setTransactions] = useState(player.transactions)
@@ -20,7 +21,7 @@ export const PlayerPage = ({ player }) => {
     const { data, error } = await axios.get(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/player/${player.id}`);
     if (error) {
       console.log(error);
-      alert("Hubo un error al obtener las transacciones fijas. Inténtalo de nuevo.");
+      toast.error("Error al cargar transacciones fijas", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
     } else {
       setFixedTransactions(data);
     }

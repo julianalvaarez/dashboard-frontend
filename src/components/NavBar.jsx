@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import { Menu, Plus, Trash } from "lucide-react"
 import { useForm } from '@/hooks/useForm';
 import { VideoInputList } from './VideoInputList';
+import { toast } from 'sonner';
+import { Textarea } from './ui/textarea';
 
 
 
@@ -30,10 +32,10 @@ export const NavBar = () => {
     const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
     const res = await axios.post("https://dashboard-backend-kmpv.onrender.com/players", data)
     if (res.status === 200) {
-      alert("Jugador agregado exitosamente.")
+      toast.success("Jugador agregado exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
       getPlayers()
     } else {
-      alert("Hubo un error al agregar el jugador. Inténtalo de nuevo.")
+      toast.error("Error al agregar el jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
     }
   }
 
@@ -95,7 +97,7 @@ export const NavBar = () => {
 
                 <div className="grid gap-3">
                   <Label htmlFor="player-notes">Notas Adicionales</Label>
-                  <Input id="player-notes" type="textarea" onChange={onInputChange} value={notes} name="notes" />
+                  <Textarea id="player-notes" onChange={onInputChange} value={notes} name="notes" />
                 </div>
                 <div className="grid gap-3">
                   <Label htmlFor="player-birthday">Fecha de Nacimiento</Label>

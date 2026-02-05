@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { useForm } from "@/hooks/useForm"
+import { toast } from "sonner"
 
 export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions, playerId, setTransactions}) => {
   const [modalEditTransaction, setModalEditTransaction] = useState(false)
@@ -33,11 +34,11 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
     const newTransaction = {...transaction, amount: transaction.amount, type: transaction.type === "Gasto" ? "expense" : "earning", player_id: playerId, date: new Date().toISOString().split('T')[0]}
     try {
       const res = await axios.post('https://dashboard-backend-kmpv.onrender.com/transactions', newTransaction)
-      if (res.status !== 200) alert("Hubo un error al agregar la transacción fija. Inténtalo de nuevo.")
-      alert("Transacción agregada exitosamente.")
+      if (res.status !== 200) toast.error("Error al agregar la transacción fija", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+      toast.success("Transacción agregada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
       setTransactions((prev) => [...prev, {...newTransaction , id: res.data.id}])
     } catch (error) {
-      alert("Hubo un error al agregar la transacción fija. Inténtalo de nuevo.")
+      toast.error("Error al agregar la transacción fija", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       console.log(error);
     }
   }
@@ -54,13 +55,13 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
       setIsLoading(true)
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${id}`, { type, description, amount: parseFloat(amount), currency })
       if (res.status === 200) {
-        alert("Transacción editada exitosamente.")
+        toast.success("Transacción editada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
         setFixedTransactions((prev) => prev.map((t) => t.id === id ? {...t, type, description, amount: parseFloat(amount), currency} : t))
       } else {
-        alert("Hubo un error al editar la transacción. Inténtalo de nuevo.")
+        toast.error("Error al editar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
     } catch (error) {
-      alert("Hubo un error al editar la transacción. Inténtalo de nuevo.")
+      toast.error("Error al editar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       console.error("Error editing transaction:", error);
     } finally {
       setIsLoading(false)

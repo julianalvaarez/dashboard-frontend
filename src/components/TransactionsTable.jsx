@@ -15,6 +15,7 @@ import axios from "axios"
 import { MONTHS, YEARS } from "@/utils/constants"
 import { useForm } from "@/hooks/useForm"
 import { ConfirmModal } from "./ConfirmModal"
+import { toast } from "sonner"
 
 export const TransactionsTable = ({ transactions, setTransactions }) => {
   const today = new Date()
@@ -54,13 +55,13 @@ export const TransactionsTable = ({ transactions, setTransactions }) => {
       setIsLoading(true)
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`, { type, description, amount: parseFloat(amount) })
       if (res.status === 200) {
-        alert("Transaccion editada exitosamente.")
+      toast.success("Transacción editada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
         setTransactions((prev) => prev.map((t) => t.id === id ? { ...t, type, description, amount: parseFloat(amount) } : t))
       } else {
-        alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
+        toast.error("Error al editar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
     } catch (error) {
-      alert("Hubo un error al editar la transaccion. Inténtalo de nuevo.")
+      toast.error("Error al editar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       console.error(error);
     } finally {
       setIsLoading(false)

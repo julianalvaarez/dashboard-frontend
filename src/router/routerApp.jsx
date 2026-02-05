@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { Route, Routes } from "react-router-dom"
 import { ContextApp } from "../context/ContextApp";
 import { PlayerPage, MonthlySummary, HomePage } from "../pages";
+import { Toaster } from "sonner";
 
 export const RouterApp = () => {
   const {players} = useContext(ContextApp)
@@ -15,6 +16,7 @@ export const RouterApp = () => {
           <Route key={player.id} path={`/player/${player.id}/*`} element={<PlayerPage player={player} />} />
         ))}
       </Routes>
+      <Toaster />
     </>
   );
 }
