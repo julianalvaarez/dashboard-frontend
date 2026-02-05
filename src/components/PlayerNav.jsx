@@ -2,7 +2,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { SlOptions } from "react-icons/sl";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,9 +14,11 @@ import { VideoInputList } from "./VideoInputList";
 import { toast } from "sonner";
 import { Textarea } from "./ui/textarea";
 import { yearsCalculator } from "@/lib/yearsCalculator";
+import { ContextApp } from "@/context/ContextApp";
 
 export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const navigate = useNavigate()
+  const {getPlayers} = useContext(ContextApp)
   const [editPlayerOpen, setEditPlayerOpen] = useState(false)
   const [addTransactionOpen, setAddTransactionOpen] = useState(false)
   const [expenseFixedOpen, setExpenseFixedOpen] = useState(false)
@@ -84,7 +86,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
   }
 
   const copyDataPlayer = () => {
-    const playerData = `${player.name}\n${yearsCalculator(player.birth_date)} Años\n${player.position}\n${player.notes}\nTransfermarkt: ${player.transfermarkt}\n${player?.video.map((video, index) => `Video ${index + 1}: ${video}`).join('\n')}`;
+    const playerData = `${player.name}\n${yearsCalculator(player.birth_date)} Años\n${player.position}\n${player.notes}${player.transfermarkt ? `\nTransfermarkt: ${player.transfermarkt}` : ''}\n${player?.video.map((video, index) => `Video ${index + 1}: ${video}`).join('\n')}`;
     navigator.clipboard.writeText(playerData);
     toast.success("Datos copiados al portapapeles", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
   }
@@ -96,7 +98,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
       if (res.status === 200) {
         toast.success("Jugador editado exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
-        navigate("/")
+        getPlayers()
       } else {
         toast.error("Error al editar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
       }
