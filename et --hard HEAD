@@ -1,0 +1,31 @@
+[33m8594e9c[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m add: HistoricalBalanceUSD
+[33m55cc22d[m errores clipboard corregidos
+[33m2b8d92c[m clipboard para las placas agregados
+[33mff571f8[m graficos por jugador agregado
+[33mc1406ce[m loadings agregados  x2
+[33md796ca5[m error Label
+[33mff9c88a[m error de imports arreglados
+[33mb71b0bb[m sistema de videos agregados
+[33m13cc8c8[m errores de booleans arreglados
+[33m211cea4[m placas agregadas
+[33m550fe8c[m loadings agregados
+[33mf808bce[m errores de transactionsTable arreglados.
+[33me186f92[m monthlySummary refaxionado
+[33m7db53a4[m Transacciones fijas agregadas
+[33m7393730[m botones que no se usaban eliminados
+[33m3c50f5c[m excel agregado
+[33m4fb4a48[m player page mejorado
+[33m2860f80[m vercel.json agregado
+[33m9ba9dc3[m atalaya expenses omitido
+[33m1a1233f[m height sheet arreglado
+[33me8bd000[m currency agregado
+[33m91760ac[m input duplicado arreglado
+[33m84fbc18[m input usd agregado
+[33m19b5a2b[m editValorUSD agregado
+[33m4678f85[m addTransaction mejorado
+[33mf25b073[m buscador jugadores agregado
+[33me5b7e4a[m conversion dolar agregada
+[33ma0306bd[m v1.3 Total transacciones agregado
+[33mad6ca8a[m v1.2 Icon agregado
+[33mec98c74[m v1.1 Api a backend
+[33me3df04d[m v1.0
