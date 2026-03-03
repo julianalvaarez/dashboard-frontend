@@ -17,6 +17,36 @@
             "src": "/logo.jpg",
             "sizes": "512x512",
             "type": "image/jpeg"
+        },
+        {
+            "src": "/logo.jpg",
+            "sizes": "180x180",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/logo.jpg",
+            "sizes": "167x167",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/logo.jpg",
+            "sizes": "152x152",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/logo.jpg",
+            "sizes": "128x128",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/logo.jpg",
+            "sizes": "64x64",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/logo.jpg",
+            "sizes": "32x32",
+            "type": "image/jpeg"
         }
     ]
 }
