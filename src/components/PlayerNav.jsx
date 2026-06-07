@@ -18,7 +18,7 @@ import { ContextApp } from "@/context/ContextApp";
 
 export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const navigate = useNavigate()
-  const {getPlayers} = useContext(ContextApp)
+  const { getPlayers } = useContext(ContextApp)
   const [editPlayerOpen, setEditPlayerOpen] = useState(false)
   const [addTransactionOpen, setAddTransactionOpen] = useState(false)
   const [expenseFixedOpen, setExpenseFixedOpen] = useState(false)
@@ -33,6 +33,11 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const addTransaction = async () => {
     try {
       setIsLoading(true)
+      if (!type || !description || isNaN(parseFloat(amount)) || !date) {
+        toast.error("Por favor, completa todos los campos correctamente", { position: "top-center" })
+        return
+      }
+
       const data = {
         player_id: player.id,
         type,
@@ -43,14 +48,13 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       }
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
       if (res.status === 200) {
-        toast.success("Transacción agregada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
-        console.log(data);
-        setTransactions([data, ...transactions]);
+        toast.success("Transacción agregada exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
+        setTransactions([res.data, ...transactions]);
       } else {
-        toast.error("Error al agregar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+        toast.error("Error al agregar la transacción", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       }
     } catch (error) {
-      toast.error("Error al agregar transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+      toast.error("Error al agregar transacción", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       console.error("Error adding transaction:", error);
     } finally {
       setIsLoading(false)
@@ -61,6 +65,11 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const addFixedTransaction = async () => {
     try {
       setIsLoading(true)
+      if (!type || !description || isNaN(parseFloat(amount))) {
+        toast.error("Por favor, completa todos los campos correctamente", { position: "top-center" })
+        return
+      }
+
       const data = {
         player_id: player.id,
         type,
@@ -71,13 +80,13 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       //https://dashboard-backend-kmpv.onrender.com
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions`, data)
       if (res.status === 200) {
-        toast.success("Transacción fija agregada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
+        toast.success("Transacción fija agregada exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
 
       } else {
-        toast.error("Error al agregar transacción fija", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+        toast.error("Error al agregar transacción fija", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       }
     } catch (error) {
-      toast.error("Error al agregar transacción fija", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+      toast.error("Error al agregar transacción fija", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       console.error("Error adding fixed transaction:", error);
     } finally {
       setIsLoading(false)
@@ -88,7 +97,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const copyDataPlayer = () => {
     const playerData = `${player.name}\n${yearsCalculator(player.birth_date)} Años\n${player.position}\n${player.notes}${player.transfermarkt ? `\nTransfermarkt: ${player.transfermarkt}` : ''}\n${player?.video.map((video, index) => `Video ${index + 1}: ${video}`).join('\n')}`;
     navigator.clipboard.writeText(playerData);
-    toast.success("Datos copiados al portapapeles", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
+    toast.success("Datos copiados al portapapeles", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
   }
 
   const editPlayer = async () => {
@@ -97,13 +106,13 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       const data = { name, birth_date: birth_date.toISOString().split('T')[0], position, transfermarkt, video, notes }
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`, data)
       if (res.status === 200) {
-        toast.success("Jugador editado exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
+        toast.success("Jugador editado exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
         getPlayers()
       } else {
-        toast.error("Error al editar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+        toast.error("Error al editar jugador", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       }
     } catch (error) {
-      toast.error("Error al editar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+      toast.error("Error al editar jugador", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       console.error("Error editing player:", error);
     } finally {
       setIsLoading(false)
@@ -117,10 +126,10 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       const res = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`)
       console.log(res.status);
       if (res.status === 200) {
-        toast.success("Jugador eliminado exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
+        toast.success("Jugador eliminado exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
         navigate("/")
       } else {
-        toast.error("Error al eliminar jugador", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+        toast.error("Error al eliminar jugador", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       }
     }
   }
@@ -191,7 +200,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
             </div>
             <div className="grid gap-3">
               <Label htmlFor="sheet-demo-notes">Notas Adicionales</Label>
-              <Textarea id="sheet-demo-notes"  onChange={onPlayerInputChange} value={notes} name="notes" />
+              <Textarea id="sheet-demo-notes" onChange={onPlayerInputChange} value={notes} name="notes" />
             </div>
           </div>
           <SheetFooter>
