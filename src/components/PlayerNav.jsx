@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Textarea } from "./ui/textarea";
 import { yearsCalculator } from "@/lib/yearsCalculator";
 import { ContextApp } from "@/context/ContextApp";
+import { CloudCog } from "lucide-react";
 
 export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const navigate = useNavigate()
@@ -37,20 +38,26 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
         toast.error("Por favor, completa todos los campos correctamente", { position: "top-center" })
         return
       }
-
+      // Agregá esta validación extra:
+      if (parseFloat(amount) <= 0) {
+        toast.error("El monto debe ser mayor a 0", { position: "top-center" })
+        return
+      }
       const data = {
         player_id: player.id,
         type,
         description,
-        amount: parseFloat(amount),
+        amount: Math.round(parseFloat(amount)),
         date: date.toISOString().split('T')[0],
         currency
       }
+
       const res = await axios.post(`https://dashboard-backend-kmpv.onrender.com/transactions`, data)
       if (res.status === 200) {
         toast.success("Transacción agregada exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
         setTransactions([res.data, ...transactions]);
       } else {
+        console.log(res.data, res);
         toast.error("Error al agregar la transacción", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       }
     } catch (error) {

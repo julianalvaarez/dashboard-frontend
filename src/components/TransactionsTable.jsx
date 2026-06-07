@@ -52,16 +52,21 @@ export const TransactionsTable = ({ transactions, setTransactions }) => {
 
   const editTransaction = async () => {
     try {
+      if (!type || !description || isNaN(parseFloat(amount))) {
+        toast.error("Por favor, completa todos los campos correctamente", { position: "top-center" })
+        return
+      }
       setIsLoading(true)
+
       const res = await axios.put(`https://dashboard-backend-kmpv.onrender.com/transactions/${id}`, { type, description, amount: parseFloat(amount) })
       if (res.status === 200) {
-      toast.success("Transacción editada exitosamente", {position: "top-center", duration: 3000, style: {background: "#333", color: "#fff"}})
+        toast.success("Transacción editada exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
         setTransactions((prev) => prev.map((t) => t.id === id ? { ...t, type, description, amount: parseFloat(amount) } : t))
       } else {
-        toast.error("Error al editar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+        toast.error("Error al editar la transacción", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       }
     } catch (error) {
-      toast.error("Error al editar la transacción", {position: "top-center", duration: 3000, style: {background: "#AD1E00", color: "#fff"}})
+      toast.error("Error al editar la transacción", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
       console.error(error);
     } finally {
       setIsLoading(false)

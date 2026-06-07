@@ -3,28 +3,27 @@ import { Input } from "@/components/ui/input"
 import axios from "axios";
 export const FiltersTable = ({ table, setTransactions }) => {
 
-    // 🔹 Función para eliminar seleccionados
-    const handleDeleteSelected = async () => {
-        window.confirm("¿Estás seguro de que deseas eliminar las transacciones seleccionadas?") &&
-        setTransactions((prev) => prev.filter((t) => !table.getFilteredSelectedRowModel().rows.some((row) => row.original.id === t.id)));
-        table.resetRowSelection();
+  // 🔹 Función para eliminar seleccionados
+  const handleDeleteSelected = async () => {
+    const confirmed = window.confirm("¿Estás seguro de que deseas eliminar las transacciones seleccionadas?");
+    if (!confirmed) return;
 
-        const selectedIds = table.getFilteredSelectedRowModel().rows.map((row) => row.original.id);
+    const selectedIds = table.getFilteredSelectedRowModel().rows.map((row) => row.original.id);
 
-        try {
-          const { data } = await axios.delete("https://dashboard-backend-kmpv.onrender.com/transactions", {
-            data: { ids: selectedIds }, // 👈 mandamos array en el body
-          });
+    try {
+      const { data } = await axios.delete("https://dashboard-backend-kmpv.onrender.com/transactions", {
+        data: { ids: selectedIds }, // 👈 mandamos array en el body
+      });
 
-          // actualizar estado en frontend
-          setTransactions((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
-          table.resetRowSelection();
+      // actualizar estado en frontend
+      setTransactions((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
+      table.resetRowSelection();
 
-          console.log(data.message);
-        } catch (error) {
-          console.error("Error eliminando transacciones:", error);
-        }
+      console.log(data.message);
+    } catch (error) {
+      console.error("Error eliminando transacciones:", error);
     }
+  }
 
   return (
     <>
@@ -47,7 +46,7 @@ export const FiltersTable = ({ table, setTransactions }) => {
             Eliminar seleccionados
           </Button>
         )}
-      </div>        
+      </div>
     </>
   )
 }
