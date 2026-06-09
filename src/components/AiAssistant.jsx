@@ -179,6 +179,7 @@ export function AIAssistant() {
 
     const sendMessage = async (text) => {
         const question = (text || input).trim();
+        console.log('Intentando enviar mensaje:', question);
         if (!question || loading) return;
 
         const userMsg = { role: "user", content: question, timestamp: new Date() };
