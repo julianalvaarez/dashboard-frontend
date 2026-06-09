@@ -3,10 +3,11 @@ import { Route, Routes } from "react-router-dom"
 import { ContextApp } from "../context/ContextApp";
 import { PlayerPage, MonthlySummary, HomePage } from "../pages";
 import { Toaster } from "sonner";
+import { AIAssistant } from "@/components/AiAssistant";
 
 export const RouterApp = () => {
-  const {players} = useContext(ContextApp)
-  
+  const { players } = useContext(ContextApp)
+
   return (
     <>
       <Routes>
@@ -17,6 +18,7 @@ export const RouterApp = () => {
         ))}
       </Routes>
       <Toaster />
+      <AIAssistant />
     </>
   );
 }
