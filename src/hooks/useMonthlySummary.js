@@ -1,5 +1,5 @@
 // src/hooks/useMonthlySummary.js
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import axios from "axios";
 import { EXCLUDED_PLAYER_ID } from "@/utils/constants";
 
@@ -8,8 +8,14 @@ export const useMonthlySummary = (month, year, filter) => {
     const [transactions, setTransactions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const abortControllerRef = useRef(null);
 
     const fetchTransactions = useCallback(async () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        abortControllerRef.current = new AbortController();
+
         try {
             setIsLoading(true);
             setError(null);
@@ -17,9 +23,11 @@ export const useMonthlySummary = (month, year, filter) => {
             const [earningsRes, expensesRes] = await Promise.all([
                 axios.get('https://dashboard-backend-kmpv.onrender.com/transactions', {
                     params: { month, year, type: "earning" },
+                    signal: abortControllerRef.current.signal,
                 }),
                 axios.get('https://dashboard-backend-kmpv.onrender.com/transactions', {
                     params: { month, year, type: "expense" },
+                    signal: abortControllerRef.current.signal,
                 }),
             ]);
 
@@ -30,6 +38,7 @@ export const useMonthlySummary = (month, year, filter) => {
 
             setTransactions(allTransactions);
         } catch (err) {
+            if (err.name === 'CanceledError' || err.name === 'AbortError') return;
             console.error("Error fetching transactions:", err);
             setError(err.message || "Error al cargar las transacciones");
             setTransactions([]);
@@ -40,6 +49,11 @@ export const useMonthlySummary = (month, year, filter) => {
 
     useEffect(() => {
         fetchTransactions();
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
     }, [fetchTransactions]);
 
     // Filtrar transacciones

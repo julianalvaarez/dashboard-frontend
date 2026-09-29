@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { IoIosArrowBack } from "react-icons/io";
 import { PlayerNav } from "@/components/PlayerNav";
 import { TransactionsTable } from "@/components/TransactionsTable"
@@ -13,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 
-export const PlayerPage = ({ player }) => {
+const PlayerPage = ({ player }) => {
   const [transactions, setTransactions] = useState(player.transactions)
   const [fixedTransactions, setFixedTransactions] = useState([])
 
@@ -52,7 +53,11 @@ export const PlayerPage = ({ player }) => {
 
   return (
     <div className="w-full px-10 py-7">
-      <Link to={'/'}>
+      <Helmet>
+        <title>{player.name} | Gestor de Transacciones</title>
+        <meta name="description" content={`Detalle financiero de ${player.name}. Balance histórico, transacciones y gráficos de utilidad.`} />
+      </Helmet>
+      <Link to={'/'} aria-label="Volver al inicio">
         <IoIosArrowBack size={24} className="cursor-pointer" />
       </Link>
       {/* 🔹 Header con menú */}
@@ -158,3 +163,5 @@ export const PlayerPage = ({ player }) => {
     </div>
   )
 }
+
+export default PlayerPage;

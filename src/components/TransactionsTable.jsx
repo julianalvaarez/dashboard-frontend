@@ -307,12 +307,12 @@ export const TransactionsTable = ({ transactions, setTransactions }) => {
               </Select>
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Descripcion</Label>
-              <Input id="sheet-demo-name" onChange={onInputChange} name="description" value={description} />
+              <Label htmlFor="edit-tx-description">Descripcion</Label>
+              <Input id="edit-tx-description" onChange={onInputChange} name="description" value={description} />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-username">Monto</Label>
-              <Input id="sheet-demo-name" onChange={onInputChange} name="amount" value={amount} />
+              <Label htmlFor="edit-tx-amount">Monto</Label>
+              <Input id="edit-tx-amount" onChange={onInputChange} name="amount" value={amount} />
             </div>
           </div>
           <SheetFooter>

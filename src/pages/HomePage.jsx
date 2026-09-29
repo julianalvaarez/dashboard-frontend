@@ -1,5 +1,6 @@
 // src/pages/HomePage.jsx
 import { useContext } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { PlayerCard } from '../components/PlayerCard';
 import { ContextApp } from '../context/ContextApp';
 import { NavBar } from '@/components/NavBar';
@@ -9,7 +10,7 @@ import { ErrorState } from '@/components/ErrorState';
 import { usePlayerSearch } from '@/hooks/usePlayerSearch';
 import { Loading } from '@/components/Loading';
 
-export const HomePage = () => {
+const HomePage = () => {
   const { players, isPlayersDataLoading, error, getPlayers } = useContext(ContextApp);
   const { search, setSearch, filteredPlayers } = usePlayerSearch(players);
 
@@ -35,6 +36,10 @@ export const HomePage = () => {
 
   return (
     <div className="p-6 min-h-screen">
+      <Helmet>
+        <title>Jugadores | Gestor de Transacciones</title>
+        <meta name="description" content="Panel principal de gestión de jugadores y sus transacciones financieras." />
+      </Helmet>
       <NavBar />
 
       {/* Header */}
@@ -58,3 +63,5 @@ export const HomePage = () => {
     </div>
   );
 };
+
+export default HomePage;

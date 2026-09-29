@@ -27,7 +27,6 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
 
   const transactionInitialForm = { player_id: player.id, type: '', description: '', amount: 0, date: new Date(), currency: 'ARS' };
   const { type, description, amount, currency, date, onInputChange: onTransactionInputChange, onSelectChange: onTransactionSelectChange } = useForm(transactionInitialForm);
-  // Estados para el formulario
   const playerInitialForm = { name: '', birth_date: null, position: '', transfermarkt: '', video: [''], notes: '' };
   const { name, birth_date, position, transfermarkt, video, notes, onInputChange: onPlayerInputChange, setFormValues, onSelectChange: onPlayerSelectChange, addVideoInput, removeVideoInput, onVideoChange } = useForm(playerInitialForm);
 
@@ -130,13 +129,13 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
   const deletePlayer = async () => {
     const confirmed = window.confirm(`¿Estás seguro de que deseas eliminar al jugador ${player.name}? Esta acción no se puede deshacer.`)
     if (confirmed) {
-      const res = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`)
-      console.log(res.status);
-      if (res.status === 200) {
+      try {
+        await axios.delete(`https://dashboard-backend-kmpv.onrender.com/players/${player.id}`)
         toast.success("Jugador eliminado exitosamente", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
         navigate("/")
-      } else {
+      } catch (error) {
         toast.error("Error al eliminar jugador", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
+        console.error("Error deleting player:", error);
       }
     }
   }
@@ -158,7 +157,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
       <div className="flex justify-between items-center p-6 border-b">
         <h1 className="text-3xl font-light ">{player.name}</h1>
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger aria-label="Opciones del jugador">
             <SlOptions size={24} className="hover:cursor-pointer" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -184,16 +183,16 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
           </SheetHeader>
           <div className="grid flex-1 auto-rows-min gap-6 px-4">
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Nombre Completo</Label>
-              <Input id="sheet-demo-name" onChange={onPlayerInputChange} value={name} name="name" />
+              <Label htmlFor="edit-player-name">Nombre Completo</Label>
+              <Input id="edit-player-name" onChange={onPlayerInputChange} value={name} name="name" />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-position">Posicion</Label>
-              <Input id="sheet-demo-position" onChange={onPlayerInputChange} value={position} name="position" />
+              <Label htmlFor="edit-player-position">Posicion</Label>
+              <Input id="edit-player-position" onChange={onPlayerInputChange} value={position} name="position" />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-transfermarkt">Transfermarkt</Label>
-              <Input id="sheet-demo-transfermarkt" onChange={onPlayerInputChange} value={transfermarkt} name="transfermarkt" />
+              <Label htmlFor="edit-player-transfermarkt">Transfermarkt</Label>
+              <Input id="edit-player-transfermarkt" onChange={onPlayerInputChange} value={transfermarkt} name="transfermarkt" />
             </div>
             <VideoInputList
               video={video}
@@ -202,12 +201,12 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
               removeVideoInput={removeVideoInput}
             />
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-birthdate">Fecha de Nacimiento</Label>
+              <Label htmlFor="edit-player-birthdate">Fecha de Nacimiento</Label>
               <Calendar mode="single" defaultMonth={new Date(player.birth_date)} selected={birth_date} onSelect={(date) => onPlayerSelectChange("birth_date", date)} name="birth_date" className="rounded-md border shadow-sm" captionLayout="dropdown" />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-notes">Notas Adicionales</Label>
-              <Textarea id="sheet-demo-notes" onChange={onPlayerInputChange} value={notes} name="notes" />
+              <Label htmlFor="edit-player-notes">Notas Adicionales</Label>
+              <Textarea id="edit-player-notes" onChange={onPlayerInputChange} value={notes} name="notes" />
             </div>
           </div>
           <SheetFooter>
@@ -240,15 +239,15 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
               </SelectContent>
             </Select>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Descripcion</Label>
-              <Input id="sheet-demo-name" onChange={onTransactionInputChange} name="description" value={description} />
+              <Label htmlFor="add-tx-description">Descripcion</Label>
+              <Input id="add-tx-description" onChange={onTransactionInputChange} name="description" value={description} />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Monto</Label>
-              <Input id="sheet-demo-name" type={"number"} onChange={onTransactionInputChange} name="amount" value={amount} />
+              <Label htmlFor="add-tx-amount">Monto</Label>
+              <Input id="add-tx-amount" type={"number"} onChange={onTransactionInputChange} name="amount" value={amount} />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="currency">Moneda</Label>
+              <Label htmlFor="add-tx-currency">Moneda</Label>
               <Select onValueChange={(value) => onTransactionSelectChange('currency', value)} name="currency" value={currency}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Moneda" />
@@ -263,7 +262,7 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
               </Select>
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-username">Fecha de Pago</Label>
+              <Label htmlFor="add-tx-date">Fecha de Pago</Label>
               <Calendar mode="single" selected={date} onSelect={(date) => onTransactionSelectChange("date", date)} name="date" className="rounded-md border shadow-sm" captionLayout="dropdown" />
             </div>
           </div>
@@ -297,16 +296,16 @@ export const PlayerNav = ({ player, transactions, setTransactions }) => {
               </SelectContent>
             </Select>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Descripcion</Label>
-              <Input id="sheet-demo-name" onChange={onTransactionInputChange} name="description" value={description} />
+              <Label htmlFor="add-fixed-description">Descripcion</Label>
+              <Input id="add-fixed-description" onChange={onTransactionInputChange} name="description" value={description} />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="sheet-demo-name">Monto</Label>
-              <Input id="sheet-demo-name" type={"number"} onChange={onTransactionInputChange} name="amount" value={amount} />
+              <Label htmlFor="add-fixed-amount">Monto</Label>
+              <Input id="add-fixed-amount" type={"number"} onChange={onTransactionInputChange} name="amount" value={amount} />
             </div>
             <div className="grid gap-3">
 
-              <Label htmlFor="currency">Moneda</Label>
+              <Label htmlFor="add-fixed-currency">Moneda</Label>
               <Select onValueChange={(value) => onTransactionSelectChange('currency', value)} name="currency" value={currency}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Moneda" />

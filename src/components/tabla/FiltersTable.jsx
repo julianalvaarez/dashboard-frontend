@@ -11,15 +11,13 @@ export const FiltersTable = ({ table, setTransactions }) => {
     const selectedIds = table.getFilteredSelectedRowModel().rows.map((row) => row.original.id);
 
     try {
-      const { data } = await axios.delete("https://dashboard-backend-kmpv.onrender.com/transactions", {
-        data: { ids: selectedIds }, // 👈 mandamos array en el body
+      await axios.delete("https://dashboard-backend-kmpv.onrender.com/transactions", {
+        data: { ids: selectedIds },
       });
 
       // actualizar estado en frontend
       setTransactions((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
       table.resetRowSelection();
-
-      console.log(data.message);
     } catch (error) {
       console.error("Error eliminando transacciones:", error);
     }
@@ -35,6 +33,7 @@ export const FiltersTable = ({ table, setTransactions }) => {
             table.getColumn("description")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
+          aria-label="Filtrar por descripción"
         />
 
         {table.getFilteredSelectedRowModel().rows.length > 0 && (

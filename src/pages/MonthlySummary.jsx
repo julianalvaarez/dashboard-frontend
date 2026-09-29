@@ -1,5 +1,6 @@
 // src/pages/MonthlySummary.jsx
 import { Calendar } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { useState } from "react";
 import { SummaryTable } from "@/components/SummaryTable";
 
-export const MonthlySummary = () => {
+const MonthlySummary = () => {
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [year, setYear] = useState(today.getFullYear());
@@ -37,8 +38,12 @@ export const MonthlySummary = () => {
 
   return (
     <div className="p-6 space-y-6">
+      <Helmet>
+        <title>Resumen Mensual | Gestor de Transacciones</title>
+        <meta name="description" content="Resumen mensual de ingresos, gastos y balances de todos los jugadores." />
+      </Helmet>
       {/* Botón volver */}
-      <Link to="/" className="flex items-center gap-2">
+      <Link to="/" className="flex items-center gap-2" aria-label="Volver al inicio">
         <IoIosArrowBack size={24} className="cursor-pointer hover:text-zinc-600" />
       </Link>
 
@@ -133,3 +138,5 @@ export const MonthlySummary = () => {
     </div>
   );
 };
+
+export default MonthlySummary;

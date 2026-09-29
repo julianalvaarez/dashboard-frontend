@@ -1,20 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="./public/logo.jpg" />
+  <link rel="icon" href="/logo.jpg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+
+  <title>Gestor de Transacciones de Jugadores</title>
+  <meta name="description" content="Sistema de gestión financiera para jugadores de fútbol. Administra ingresos, gastos, balances mensuales y exporta reportes en Excel." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://gestor-jugadores.vercel.app" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Gestor de Transacciones de Jugadores" />
+  <meta property="og:description" content="Sistema de gestión financiera para jugadores de fútbol. Administra ingresos, gastos, balances mensuales y exporta reportes en Excel." />
+  <meta property="og:image" content="/logo.jpg" />
+  <meta property="og:url" content="https://gestor-jugadores.vercel.app" />
+  <meta property="og:locale" content="es_AR" />
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Gestor de Transacciones de Jugadores" />
+  <meta name="twitter:description" content="Sistema de gestión financiera para jugadores de fútbol." />
+  <meta name="twitter:image" content="/logo.jpg" />
+
+  <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#000000" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="/logo.jpg" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <meta name="apple-mobile-web-app-title" content="Gestor Jugadores" />
-  <title>Gestor de Transacciones</title>
+
+  <!-- Performance: preconnect a la API -->
+  <link rel="preconnect" href="https://dashboard-backend-kmpv.onrender.com" />
+
+  <!-- Security -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
 </head>
 
 <body>
+  <noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>

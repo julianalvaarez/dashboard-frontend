@@ -120,7 +120,7 @@ export const NavBar = () => {
         <div className="md:hidden flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Abrir menú de navegación">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>

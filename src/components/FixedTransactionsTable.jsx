@@ -44,9 +44,13 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
   }
 
   const deleteFixedTransaction = async (id) => {
-      const {error} = await axios.delete(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${id}`)
-      if (!error) {
-          setFixedTransactions(fixedTransactions.filter(t => t.id !== id))
+      try {
+        await axios.delete(`https://dashboard-backend-kmpv.onrender.com/fixed-transactions/${id}`)
+        setFixedTransactions(fixedTransactions.filter(t => t.id !== id))
+        toast.success("Transacción fija eliminada", { position: "top-center", duration: 3000, style: { background: "#333", color: "#fff" } })
+      } catch (error) {
+        toast.error("Error al eliminar transacción fija", { position: "top-center", duration: 3000, style: { background: "#AD1E00", color: "#fff" } })
+        console.error("Error deleting fixed transaction:", error)
       }
   }
 
@@ -280,12 +284,12 @@ export const FixedTransactionsTable = ({fixedTransactions, setFixedTransactions,
                       </Select>
                     </div>
                     <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-name">Descripcion</Label>
-                        <Input id="sheet-demo-name"  onChange={onInputChange} value={description} name="description" />
+                        <Label htmlFor="edit-fixed-description">Descripcion</Label>
+                        <Input id="edit-fixed-description"  onChange={onInputChange} value={description} name="description" />
                     </div>
                     <div className="grid gap-3">
-                        <Label htmlFor="sheet-demo-username">Monto</Label>
-                        <Input id="sheet-demo-name" type={"number"}  onChange={onInputChange} value={amount} name="amount" />
+                        <Label htmlFor="edit-fixed-amount">Monto</Label>
+                        <Input id="edit-fixed-amount" type={"number"}  onChange={onInputChange} value={amount} name="amount" />
                     </div>
                 </div>
                 <SheetFooter>

@@ -136,7 +136,7 @@ function TypingIndicator() {
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export function AIAssistant() {
-    const { players } = useContext(ContextApp);
+    const { players, getPlayers } = useContext(ContextApp);
     const location = useLocation();
 
     // Detectar si estamos en la página de un jugador
@@ -179,7 +179,6 @@ export function AIAssistant() {
 
     const sendMessage = async (text) => {
         const question = (text || input).trim();
-        console.log('Intentando enviar mensaje:', question);
         if (!question || loading) return;
 
         const userMsg = { role: "user", content: question, timestamp: new Date() };
@@ -205,6 +204,10 @@ export function AIAssistant() {
             });
 
             if (data.success === false) throw new Error(data.error || "Error desconocido");
+
+            if (data.transactionCreated && typeof getPlayers === 'function') {
+                getPlayers();
+            }
 
             const assistantMsg = {
                 role: "assistant",
@@ -252,7 +255,9 @@ export function AIAssistant() {
             {/* Botón flotante */}
             <button
                 onClick={() => setIsOpen((o) => !o)}
-                title="Asistente IA"
+                aria-label={isOpen ? "Cerrar asistente IA" : "Abrir asistente IA"}
+                aria-expanded={isOpen}
+                aria-controls="ai-chat-panel"
                 style={{
                     position: "fixed",
                     bottom: "24px",
@@ -308,6 +313,10 @@ export function AIAssistant() {
             {/* Panel de chat */}
             {isOpen && (
                 <div
+                    id="ai-chat-panel"
+                    role="dialog"
+                    aria-label="Chat con asistente financiero"
+                    aria-modal="false"
                     style={{
                         position: "fixed",
                         bottom: "92px",
@@ -346,7 +355,7 @@ export function AIAssistant() {
                         </div>
                         <button
                             onClick={clearChat}
-                            title="Limpiar chat"
+                            aria-label="Limpiar historial del chat"
                             style={{
                                 background: "rgba(255,255,255,0.15)",
                                 border: "none",
@@ -363,6 +372,9 @@ export function AIAssistant() {
 
                     {/* Mensajes */}
                     <div
+                        role="log"
+                        aria-live="polite"
+                        aria-label="Historial de mensajes"
                         style={{
                             flex: 1,
                             overflowY: "auto",
@@ -428,6 +440,7 @@ export function AIAssistant() {
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="Preguntá sobre gastos, ingresos o balances..."
+                            aria-label="Escribí tu pregunta"
                             disabled={loading}
                             rows={1}
                             style={{
@@ -452,6 +465,7 @@ export function AIAssistant() {
                         <button
                             onClick={() => sendMessage()}
                             disabled={loading || !input.trim()}
+                            aria-label="Enviar mensaje"
                             style={{
                                 width: "40px",
                                 height: "40px",
@@ -476,14 +490,6 @@ export function AIAssistant() {
                     </div>
                 </div>
             )}
-
-            {/* Animación bounce para el indicador de escritura */}
-            <style>{`
-        @keyframes bounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
-      `}</style>
         </>
     );
 }
